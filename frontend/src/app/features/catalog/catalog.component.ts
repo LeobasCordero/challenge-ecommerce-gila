@@ -553,7 +553,13 @@ export class CatalogComponent implements OnInit {
     const existingItem = this.cartState.cart()?.items?.find(i => i.product?.id === product.id);
     const newQty = (existingItem?.quantity ?? 0) + 1;
 
-    this.cartApiService.updateCartItem({ productId: product.id!, quantity: newQty }).subscribe({
+    if (!product.id) {
+      this.isAddingToCart.set(false);
+      this.snackBar.open('Cannot add item: product ID is missing.', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.cartApiService.updateCartItem({ productId: product.id, quantity: newQty }).subscribe({
       next: (cart) => {
         this.cartState.setCart(cart);
         this.isAddingToCart.set(false);
