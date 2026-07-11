@@ -1,5 +1,6 @@
 package com.gila.ecommerce.service;
 
+import com.gila.ecommerce.aspect.Auditable;
 import com.gila.ecommerce.dto.CartDto;
 import com.gila.ecommerce.dto.CartItemDto;
 import com.gila.ecommerce.dto.OrderDto;
@@ -11,19 +12,17 @@ import com.gila.ecommerce.model.User;
 import com.gila.ecommerce.repository.OrderRepository;
 import com.gila.ecommerce.repository.ProductRepository;
 import com.gila.ecommerce.repository.UserRepository;
+import com.gila.ecommerce.util.AuditAction;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import com.gila.ecommerce.util.AuditAction;
-import com.gila.ecommerce.util.AuditStatus;
 
 /**
  * Service implementation processing transactional checkouts and order history resets.
@@ -31,32 +30,28 @@ import com.gila.ecommerce.util.AuditStatus;
 @Service
 public class CheckoutServiceImpl implements CheckoutService {
 
-    private final UserRepository userRepository;
-    private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
+    private final UserRepository userRepository;
     private final CartService cartService;
-    private final AuditLogService auditLogService;
 
     /**
      * Constructor injecting dependencies.
-     * @param userRepository user database interface
+     * @param orderRepository order log database interface
      * @param productRepository product catalog database interface
-     * @param orderRepository order database interface
-     * @param cartService shopping cart service interface
-     * @param auditLogService audit logging service interface
+     * @param userRepository user profile database interface
+     * @param cartService shopping cart service session manager
      */
     public CheckoutServiceImpl(
-            UserRepository userRepository,
-            ProductRepository productRepository,
             OrderRepository orderRepository,
-            CartService cartService,
-            AuditLogService auditLogService
+            ProductRepository productRepository,
+            UserRepository userRepository,
+            CartService cartService
     ) {
-        this.userRepository = userRepository;
-        this.productRepository = productRepository;
         this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
         this.cartService = cartService;
-        this.auditLogService = auditLogService;
     }
 
     /**
@@ -66,15 +61,14 @@ public class CheckoutServiceImpl implements CheckoutService {
      */
     @Override
     @Transactional
+    @Auditable(action = AuditAction.CHECKOUT)
     public OrderDto checkout(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
         CartDto cart = cartService.getCart(username);
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
-            ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
-            auditLogService.log(username, AuditAction.CHECKOUT.getValue(), AuditStatus.FAILURE.getValue(), Map.of("reason", "Cart is empty"));
-            throw ex;
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
         }
 
         UUID orderId = UUID.randomUUID();
@@ -90,20 +84,14 @@ public class CheckoutServiceImpl implements CheckoutService {
         for (CartItemDto cartItem : cart.getItems()) {
             UUID productId = cartItem.getProduct().getId();
             Product product = productRepository.findWithLockById(productId)
-                    .orElseThrow(() -> {
-                        ResponseStatusException ex = new ResponseStatusException(
-                                HttpStatus.BAD_REQUEST, "Product not found: " + productId
-                        );
-                        auditLogService.log(username, AuditAction.CHECKOUT.getValue(), AuditStatus.FAILURE.getValue(), Map.of("reason", "Product not found: " + productId));
-                        return ex;
-                    });
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST, "Product not found: " + productId
+                    ));
 
             if (product.getStock() < cartItem.getQuantity()) {
-                ResponseStatusException ex = new ResponseStatusException(
+                throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "Insufficient stock for product: " + product.getName()
                 );
-                auditLogService.log(username, AuditAction.CHECKOUT.getValue(), AuditStatus.FAILURE.getValue(), Map.of("reason", "Insufficient stock for product: " + product.getName()));
-                throw ex;
             }
 
             product.setStock(product.getStock() - cartItem.getQuantity());
@@ -126,48 +114,55 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         cartService.clearCart(username);
 
-        auditLogService.log(username, AuditAction.CHECKOUT.getValue(), AuditStatus.SUCCESS.getValue(), Map.of(
-                "orderId", orderId.toString(),
-                "totalPrice", total.doubleValue()
-        ));
-
         return toOrderDto(savedOrder);
     }
 
     /**
-     * Reset order transaction history and restore product stocks.
+     * Reset database transaction tables and restore original product baseline stock settings.
      */
     @Override
     @Transactional
     public void clearOrders() {
+        List<Product> products = productRepository.findAll();
+        for (Product product : products) {
+            if (product.getInitialStock() != null) {
+                product.setStock(product.getInitialStock());
+                productRepository.save(product);
+            }
+        }
         orderRepository.deleteAll();
-        productRepository.findAll().forEach(product -> {
-            product.setStock(product.getInitialStock());
-            productRepository.save(product);
-        });
     }
 
     /**
-     * Maps an Order entity to an OrderDto model.
-     * @param order database order entity
-     * @return order DTO model
+     * Map order data model fields into response DTO wrappers.
+     * @param order entity model instance
+     * @return populated DTO container
      */
     private OrderDto toOrderDto(Order order) {
         OrderDto dto = new OrderDto();
         dto.setId(order.getId());
         dto.setStatus(order.getStatus());
         dto.setTotalPrice(order.getTotalPrice().doubleValue());
-        dto.setCreatedAt(order.getCreatedAt());
+        if (order.getItems() != null) {
+            dto.setItems(order.getItems().stream()
+                    .map(this::toOrderItemDto)
+                    .collect(Collectors.toList()));
+        } else {
+            dto.setItems(new ArrayList<>());
+        }
+        return dto;
+    }
 
-        List<OrderItemDto> itemDtos = order.getItems().stream().map(item -> {
-            OrderItemDto itemDto = new OrderItemDto();
-            itemDto.setProduct(ProductMapper.toDto(item.getProduct()));
-            itemDto.setQuantity(item.getQuantity());
-            itemDto.setPriceAtPurchase(item.getPriceAtPurchase().doubleValue());
-            return itemDto;
-        }).collect(Collectors.toList());
-
-        dto.setItems(itemDtos);
+    /**
+     * Map order item data model fields into response DTO wrappers.
+     * @param item entity model item instance
+     * @return populated item DTO container
+     */
+    private OrderItemDto toOrderItemDto(OrderItem item) {
+        OrderItemDto dto = new OrderItemDto();
+        dto.setProduct(ProductMapper.toDto(item.getProduct()));
+        dto.setQuantity(item.getQuantity());
+        dto.setPriceAtPurchase(item.getPriceAtPurchase().doubleValue());
         return dto;
     }
 }
