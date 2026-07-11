@@ -2,18 +2,26 @@ package com.gila.ecommerce.controller;
 
 import com.gila.ecommerce.api.OrdersApi;
 import com.gila.ecommerce.dto.OrderDto;
+import com.gila.ecommerce.service.CheckoutService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.UUID;
-
 /**
- * Controller stub implementing checkout and administrative reset endpoints.
+ * Controller implementing checkout and administrative reset endpoints.
  */
 @RestController
 public class OrderController implements OrdersApi {
+
+    private final CheckoutService checkoutService;
+
+    /**
+     * Constructor injecting CheckoutService.
+     * @param checkoutService transactional checkout business service
+     */
+    public OrderController(CheckoutService checkoutService) {
+        this.checkoutService = checkoutService;
+    }
 
     /**
      * Complete checkout and generate a billing record.
@@ -21,13 +29,7 @@ public class OrderController implements OrdersApi {
      */
     @Override
     public ResponseEntity<OrderDto> checkout() {
-        OrderDto order = new OrderDto();
-        order.setId(UUID.randomUUID());
-        order.setStatus("PAID");
-        order.setTotalPrice(199.99);
-        order.setItems(new ArrayList<>());
-        order.setCreatedAt(OffsetDateTime.now());
-        return ResponseEntity.ok(order);
+        return ResponseEntity.ok(checkoutService.checkout(getAuthenticatedUsername()));
     }
 
     /**
@@ -36,6 +38,15 @@ public class OrderController implements OrdersApi {
      */
     @Override
     public ResponseEntity<Void> clearOrders() {
+        checkoutService.clearOrders();
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Retrieve authenticated username context.
+     * @return username key from security principal
+     */
+    private String getAuthenticatedUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }
