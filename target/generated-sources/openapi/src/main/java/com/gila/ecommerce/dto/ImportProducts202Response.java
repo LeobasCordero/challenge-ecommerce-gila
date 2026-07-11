@@ -21,7 +21,7 @@ import jakarta.annotation.Generated;
  */
 
 @JsonTypeName("importProducts_202_response")
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-07-10T22:39:40.388469-06:00[GMT-06:00]", comments = "Generator version: 7.4.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-07-10T22:50:57.121248300-06:00[GMT-06:00]", comments = "Generator version: 7.4.0")
 public class ImportProducts202Response {
 
   private UUID taskId;
