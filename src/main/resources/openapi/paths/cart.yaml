@@ -1,0 +1,48 @@
+get:
+  tags:
+    - Cart
+  summary: Get the current customer's shopping cart (Customer only)
+  operationId: getCart
+  responses:
+    '200':
+      description: Shopping cart retrieved successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/cart.yaml#/CartDto'
+    '401':
+      description: Unauthorized JWT session
+    '403':
+      description: Forbidden (requires customer role)
+post:
+  tags:
+    - Cart
+  summary: Add or update item quantity in the cart (Customer only)
+  operationId: updateCartItem
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/cart.yaml#/CartItemRequestDto'
+  responses:
+    '200':
+      description: Shopping cart updated successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/cart.yaml#/CartDto'
+    '400':
+      description: Invalid request payload or quantity limits exceeded
+    '403':
+      description: Forbidden (requires customer role)
+delete:
+  tags:
+    - Cart
+  summary: Clear all items from the cart (Customer only)
+  operationId: clearCart
+  responses:
+    '204':
+      description: Cart cleared successfully
+    '403':
+      description: Forbidden (requires customer role)

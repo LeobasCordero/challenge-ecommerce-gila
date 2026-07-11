@@ -1,0 +1,64 @@
+get:
+  tags:
+    - Products
+  summary: Retrieve products with optional filter/search
+  operationId: getProducts
+  security: []
+  parameters:
+    - name: query
+      in: query
+      description: Search term matching product name or description
+      required: false
+      schema:
+        type: string
+    - name: category
+      in: query
+      description: Filter products by category
+      required: false
+      schema:
+        type: string
+    - name: page
+      in: query
+      description: Page number (0-indexed)
+      required: false
+      schema:
+        type: integer
+        default: 0
+    - name: size
+      in: query
+      description: Page size limit
+      required: false
+      schema:
+        type: integer
+        default: 10
+  responses:
+    '200':
+      description: List of products matching criteria
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/products.yaml#/ProductDto'
+post:
+  tags:
+    - Products
+  summary: Create a new product (Admin only)
+  operationId: createProduct
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/products.yaml#/ProductDto'
+  responses:
+    '201':
+      description: Product successfully created
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/products.yaml#/ProductDto'
+    '400':
+      description: Invalid product details supplied
+    '403':
+      description: Forbidden operation (requires admin role)

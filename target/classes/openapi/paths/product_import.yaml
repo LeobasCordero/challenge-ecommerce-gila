@@ -1,0 +1,36 @@
+post:
+  tags:
+    - Products
+  summary: Asynchronously import products from a CSV file (Admin only)
+  operationId: importProducts
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            file:
+              type: string
+              format: binary
+              description: The CSV file to upload containing product records
+  responses:
+    '202':
+      description: CSV import task accepted and queued for Kafka processing
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              taskId:
+                type: string
+                format: uuid
+                description: Unique identifier of the queued import task
+              status:
+                type: string
+                description: Initial status of the task
+                example: PENDING
+    '400':
+      description: Invalid file format or missing CSV headers
+    '403':
+      description: Forbidden (requires admin role)
