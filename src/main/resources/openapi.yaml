@@ -1,0 +1,502 @@
+openapi: 3.0.3
+info:
+  title: Gila E-Commerce API
+  description: API specifications for challenge e-commerce application including products CRUD, bulk CSV import, Redis shopping cart, and purchase checkout.
+  version: 1.0.0
+servers:
+  - url: /
+    description: Root URL prefix
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Authenticate user and return JWT
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequestDto'
+      responses:
+        '200':
+          description: Successful authentication
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseDto'
+        '401':
+          description: Unauthorized credentials
+
+  /api/v1/products:
+    get:
+      tags:
+        - Products
+      summary: Retrieve products with optional filter/search
+      operationId: getProducts
+      security: []
+      parameters:
+        - name: query
+          in: query
+          description: Search term matching product name or description
+          required: false
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Filter products by category
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number (0-indexed)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Page size limit
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: List of products matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDto'
+    post:
+      tags:
+        - Products
+      summary: Create a new product (Admin only)
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDto'
+      responses:
+        '201':
+          description: Product successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDto'
+        '400':
+          description: Invalid product details supplied
+        '403':
+          description: Forbidden operation (requires admin role)
+
+  /api/v1/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get details of a single product
+      operationId: getProductById
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Product details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDto'
+        '404':
+          description: Product not found
+    put:
+      tags:
+        - Products
+      summary: Update an existing product (Admin only)
+      operationId: updateProduct
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDto'
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDto'
+        '404':
+          description: Product not found
+        '403':
+          description: Forbidden operation (requires admin role)
+    delete:
+      tags:
+        - Products
+      summary: Delete a product (Admin only)
+      operationId: deleteProduct
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Product deleted successfully
+        '404':
+          description: Product not found
+        '403':
+          description: Forbidden (requires admin role)
+
+  /api/v1/products/import:
+    post:
+      tags:
+        - Products
+      summary: Asynchronously import products from a CSV file (Admin only)
+      operationId: importProducts
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload containing product records
+      responses:
+        '202':
+          description: CSV import task accepted and queued for Kafka processing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  taskId:
+                    type: string
+                    format: uuid
+                    description: Unique identifier of the queued import task
+                  status:
+                    type: string
+                    description: Initial status of the task
+                    example: PENDING
+        '400':
+          description: Invalid file format or missing CSV headers
+        '403':
+          description: Forbidden (requires admin role)
+
+  /api/v1/products/import/status/{taskId}:
+    get:
+      tags:
+        - Products
+      summary: Check status and validation reports of a CSV import task (Admin only)
+      operationId: getImportStatus
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Task import status report retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductImportStatusDto'
+        '404':
+          description: Import task not found
+        '403':
+          description: Forbidden (requires admin role)
+
+  /api/v1/cart:
+    get:
+      tags:
+        - Cart
+      summary: Get the current customer's shopping cart (Customer only)
+      operationId: getCart
+      responses:
+        '200':
+          description: Shopping cart retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartDto'
+        '401':
+          description: Unauthorized JWT session
+        '403':
+          description: Forbidden (requires customer role)
+    post:
+      tags:
+        - Cart
+      summary: Add or update item quantity in the cart (Customer only)
+      operationId: updateCartItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemRequestDto'
+      responses:
+        '200':
+          description: Shopping cart updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartDto'
+        '400':
+          description: Invalid request payload or quantity limits exceeded
+        '403':
+          description: Forbidden (requires customer role)
+    delete:
+      tags:
+        - Cart
+      summary: Clear all items from the cart (Customer only)
+      operationId: clearCart
+      responses:
+        '204':
+          description: Cart cleared successfully
+        '403':
+          description: Forbidden (requires customer role)
+
+  /api/v1/cart/items/{productId}:
+    delete:
+      tags:
+        - Cart
+      summary: Remove a specific item from the cart (Customer only)
+      operationId: removeCartItem
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Item removed and updated cart returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartDto'
+        '404':
+          description: Product not found in cart
+        '403':
+          description: Forbidden (requires customer role)
+
+  /api/v1/orders/checkout:
+    post:
+      tags:
+        - Orders
+      summary: Process checkout for the current cart (Customer only)
+      operationId: checkout
+      responses:
+        '200':
+          description: Order checked out and payment authorized successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDto'
+        '400':
+          description: Empty cart or stock validation failed
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden (requires customer role)
+
+  /api/v1/orders/clear:
+    delete:
+      tags:
+        - Orders
+      summary: Truncate database orders and reset system inventory defaults (Admin only)
+      operationId: clearOrders
+      responses:
+        '204':
+          description: Orders database reset completed successfully
+        '403':
+          description: Forbidden (requires admin role)
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequestDto:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    LoginResponseDto:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: JWT Bearer authentication token
+
+    ProductDto:
+      type: object
+      required:
+        - name
+        - price
+        - stock
+        - category
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+        stock:
+          type: integer
+          format: int32
+        category:
+          type: string
+
+    ProductImportStatusDto:
+      type: object
+      required:
+        - taskId
+        - status
+        - totalRows
+        - processedRows
+        - errorCount
+        - warnings
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: COMPLETED
+        totalRows:
+          type: integer
+        processedRows:
+          type: integer
+        errorCount:
+          type: integer
+        warnings:
+          type: array
+          items:
+            type: string
+            description: Specific logs warning on stock clamps, sanitisations, etc.
+
+    CartDto:
+      type: object
+      required:
+        - items
+        - totalPrice
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItemDto'
+        totalPrice:
+          type: number
+          format: double
+
+    CartItemDto:
+      type: object
+      required:
+        - product
+        - quantity
+      properties:
+        product:
+          $ref: '#/components/schemas/ProductDto'
+        quantity:
+          type: integer
+
+    CartItemRequestDto:
+      type: object
+      required:
+        - productId
+        - quantity
+      properties:
+        productId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          minimum: 1
+
+    OrderDto:
+      type: object
+      required:
+        - id
+        - status
+        - totalPrice
+        - items
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          example: PAID
+        totalPrice:
+          type: number
+          format: double
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemDto'
+        createdAt:
+          type: string
+          format: date-time
+
+    OrderItemDto:
+      type: object
+      required:
+        - product
+        - quantity
+        - priceAtPurchase
+      properties:
+        product:
+          $ref: '#/components/schemas/ProductDto'
+        quantity:
+          type: integer
+        priceAtPurchase:
+          type: number
+          format: double
