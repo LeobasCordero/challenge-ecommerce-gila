@@ -1,0 +1,14 @@
+{
+  "extends": "stylelint-config-standard-scss",
+  "rules": {
+    "color-hex-length": null,
+    "alpha-value-notation": null,
+    "color-function-notation": null,
+    "color-function-alias-notation": null,
+    "scss/dollar-variable-empty-line-before": null,
+    "scss/no-global-function-names": null,
+    "scss/load-partial-extension": null,
+    "selector-class-pattern": null,
+    "no-descending-specificity": null
+  }
+}

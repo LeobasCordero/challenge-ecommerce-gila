@@ -1,0 +1,51 @@
+.header {
+  background-color: $card-bg;
+  border-bottom: 1px solid $border-color;
+  padding: $spacing-md 0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  
+  &-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  &-logo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-weight: 700;
+    font-size: $font-size-lg;
+    color: $primary-color;
+  }
+  
+  &-nav {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    
+    @include mobile {
+      gap: $spacing-sm;
+    }
+  }
+  
+  &-link {
+    color: $text-muted;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $radius-sm;
+    
+    &:hover {
+      color: $primary-color;
+      background-color: rgba($primary-color, 0.05);
+    }
+    
+    &.active {
+      color: $primary-color;
+      font-weight: 600;
+    }
+  }
+}
