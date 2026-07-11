@@ -32,6 +32,7 @@ C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\target\generated-sources\openapi\src\main\java\com\gila\ecommerce\api\CartApi.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\service\AuditLogService.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\service\ProductServiceImpl.java
+C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\util\ImportStatus.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\repository\ProductRepository.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\kafka\ProductRowSanitizer.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\repository\RoleRepository.java
