@@ -5,6 +5,7 @@ com\gila\ecommerce\service\AuditLogService.class
 com\gila\ecommerce\model\Product.class
 com\gila\ecommerce\model\Role.class
 com\gila\ecommerce\ECommerceApplication.class
+com\gila\ecommerce\util\AuditStatus.class
 com\gila\ecommerce\kafka\ProductCsvParser.class
 com\gila\ecommerce\model\AuditLog.class
 com\gila\ecommerce\repository\ProductRepository.class
@@ -22,3 +23,4 @@ com\gila\ecommerce\security\JwtAuthenticationFilter.class
 com\gila\ecommerce\repository\RoleRepository.class
 com\gila\ecommerce\kafka\AuditLogConsumer.class
 com\gila\ecommerce\security\UserPrincipal.class
+com\gila\ecommerce\util\AuditAction.class
