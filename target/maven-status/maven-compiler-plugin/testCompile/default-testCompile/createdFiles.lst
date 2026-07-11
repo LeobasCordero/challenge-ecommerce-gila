@@ -1,0 +1,12 @@
+com/gila/ecommerce/kafka/ProductCsvParserTest.class
+com/gila/ecommerce/service/ProductServiceImplTest.class
+com/gila/ecommerce/service/InMemoryCartServiceTest.class
+com/gila/ecommerce/service/AuditLogServiceImplTest.class
+com/gila/ecommerce/security/CustomUserDetailsServiceTest.class
+com/gila/ecommerce/controller/ContractValidationTest.class
+com/gila/ecommerce/kafka/ProductImportProcessorTest.class
+com/gila/ecommerce/service/AuditLogServiceImplTest$1.class
+com/gila/ecommerce/service/CheckoutServiceImplTest.class
+com/gila/ecommerce/security/JwtTokenProviderTest.class
+com/gila/ecommerce/service/SecurityParameterizedTest.class
+com/gila/ecommerce/service/ProductImportServiceImplTest.class
