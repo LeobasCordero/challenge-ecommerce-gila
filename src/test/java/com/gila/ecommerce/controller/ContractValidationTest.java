@@ -6,6 +6,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
+import org.springframework.http.HttpMethod;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,6 +24,7 @@ import com.gila.ecommerce.service.ProductService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -33,6 +36,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import com.gila.ecommerce.security.QueryMethodFilter;
 
 /**
  * MockMvc contract validation test suite.
@@ -42,7 +47,6 @@ import org.springframework.test.web.servlet.MockMvc;
 @WithMockUser(username = "customer")
 public class ContractValidationTest {
 
-    @Autowired
     private MockMvc mockMvc;
 
     @MockBean
@@ -68,6 +72,18 @@ public class ContractValidationTest {
 
     @MockBean
     private CustomUserDetailsService customUserDetailsService;
+
+    @BeforeEach
+    public void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(
+                new AuthController(authenticationManager, jwtTokenProvider),
+                new ProductController(productService, productImportService),
+                new CartController(cartService),
+                new OrderController(checkoutService)
+        )
+        .addFilters(new QueryMethodFilter())
+        .build();
+    }
 
     /**
      * Verify auth login endpoint maps correctly and returns JWT.
@@ -104,10 +120,30 @@ public class ContractValidationTest {
         mockMvc.perform(get("/api/v1/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Sample Item"));
-    }
+     }
+ 
+     /**
+      * Verify QUERY products returns catalog results.
+      */
+     @Test
+     public void testQueryProductsContract() throws Exception {
+         ProductDto item = new ProductDto();
+         item.setId(UUID.randomUUID());
+         item.setName("Query Item");
+         item.setPrice(19.99);
+         item.setStock(10);
+         item.setCategory("Electronics");
 
-    /**
-     * Verify POST products creates a product.
+         when(productService.getProducts(any(), any(), any(), any()))
+                 .thenReturn(Collections.singletonList(item));
+
+         mockMvc.perform(request(HttpMethod.valueOf("QUERY"), "/api/v1/products"))
+                 .andExpect(status().isOk())
+                 .andExpect(jsonPath("$[0].name").value("Query Item"));
+     }
+
+     /**
+      * Verify POST products creates a product.
      */
     @Test
     public void testCreateProductContract() throws Exception {

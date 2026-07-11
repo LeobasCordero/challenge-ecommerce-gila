@@ -19,7 +19,7 @@ import jakarta.annotation.Generated;
  * OrderItemDto
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-07-11T13:14:35.770236700-06:00[GMT-06:00]", comments = "Generator version: 7.4.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-07-11T13:40:45.765834200-06:00[GMT-06:00]", comments = "Generator version: 7.4.0")
 public class OrderItemDto {
 
   private ProductDto product;

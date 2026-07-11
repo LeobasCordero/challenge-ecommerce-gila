@@ -21,6 +21,7 @@ C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\security\JwtAuthenticationFilter.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\target\generated-sources\openapi\src\main\java\com\gila\ecommerce\dto\ImportProducts202Response.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\target\generated-sources\openapi\src\main\java\com\gila\ecommerce\dto\LoginRequestDto.java
+C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\security\QueryMethodFilter.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\service\ProductImportServiceImpl.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\kafka\SanitizedRow.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\controller\AuthController.java
