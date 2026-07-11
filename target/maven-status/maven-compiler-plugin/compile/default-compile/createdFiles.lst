@@ -10,6 +10,7 @@ com\gila\ecommerce\api\ApiUtil.class
 com\gila\ecommerce\model\User.class
 com\gila\ecommerce\security\CustomUserDetailsService.class
 com\gila\ecommerce\service\AuditLogService.class
+com\gila\ecommerce\service\RedisCartServiceImpl.class
 com\gila\ecommerce\model\Product.class
 com\gila\ecommerce\service\CheckoutService.class
 com\gila\ecommerce\model\Role.class
