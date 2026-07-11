@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Component, OnInit, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,7 +13,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { ProductsService } from '../../core/api/api/products.service';
+import { CartService as CartApiService } from '../../core/api/api/cart.service';
+import { OrdersService } from '../../core/api/api/orders.service';
 import { ProductDto } from '../../core/api/model/productDto';
+import { CartItemDto } from '../../core/api/model/cartItemDto';
 import { CartStateService } from '../../core/state/cart-state.service';
 import { AuthStateService } from '../../core/state/auth-state.service';
 
@@ -90,7 +93,9 @@ import { AuthStateService } from '../../core/state/auth-state.service';
 
             <mat-card-footer class="product-card-footer">
               <span class="product-price">\${{ (product.price ?? 0).toFixed(2) }}</span>
-              <button mat-raised-button color="primary" class="add-to-cart-btn" (click)="addToCart(product)" [disabled]="(product.stock ?? 0) === 0">
+              <button mat-raised-button color="primary" id="add-to-cart-{{ product.id }}"
+                class="add-to-cart-btn" (click)="addToCart(product)"
+                [disabled]="(product.stock ?? 0) === 0 || isAddingToCart()">
                 <mat-icon>add_shopping_cart</mat-icon>
                 <span i18n="@@addToCartBtn">Add</span>
               </button>
@@ -99,31 +104,79 @@ import { AuthStateService } from '../../core/state/auth-state.service';
         </div>
       </section>
 
-      <!-- Sidebar Cart Summary Panel Placeholder -->
-      <div class="cart-sidebar" [class.open]="isCartOpen()">
+      <!-- Cart Sidebar Drawer -->
+      <button class="cart-sidebar-overlay" [class.open]="isCartOpen()" (click)="closeCart()"
+        aria-label="Close cart overlay" tabindex="-1"></button>
+      <aside class="cart-sidebar" [class.open]="isCartOpen()" aria-label="Shopping cart">
         <div class="cart-sidebar-header">
           <h3 i18n="@@cartTitle">Shopping Cart</h3>
-          <button mat-icon-button (click)="closeCart()">
+          <button mat-icon-button id="close-cart-btn" (click)="closeCart()" aria-label="Close cart">
             <mat-icon>close</mat-icon>
           </button>
         </div>
         <mat-divider></mat-divider>
-        
+
         <div class="cart-sidebar-content">
+          <!-- Empty state -->
           <div class="cart-empty" *ngIf="cartState.itemCount() === 0">
             <mat-icon class="cart-empty-icon">shopping_cart_off</mat-icon>
             <p i18n="@@cartEmptyMessage">Your cart is empty.</p>
           </div>
-          
+
+          <!-- Cart items list -->
           <div class="cart-items" *ngIf="cartState.itemCount() > 0">
-            <!-- Items mapped list will appear here in Phase 4 -->
-            <div class="cart-summary-totals">
-              <span i18n="@@cartTotalLabel">Total Items:</span>
-              <strong>{{ cartState.itemCount() }}</strong>
+            <div class="cart-item" *ngFor="let item of cartState.cart()?.items ?? []">
+              <div class="cart-item-info">
+                <span class="cart-item-name">{{ item.product?.name }}</span>
+                <span class="cart-item-price">\${{ ((item.product?.price ?? 0) * (item.quantity ?? 0)).toFixed(2) }}</span>
+              </div>
+              <div class="cart-item-controls">
+                <button mat-icon-button class="qty-btn" id="decrease-qty-{{ item.product?.id }}"
+                  (click)="changeQuantity(item, -1)"
+                  [disabled]="isUpdatingCart()"
+                  aria-label="Decrease quantity">
+                  <mat-icon>remove</mat-icon>
+                </button>
+                <span class="cart-item-qty">{{ item.quantity }}</span>
+                <button mat-icon-button class="qty-btn" id="increase-qty-{{ item.product?.id }}"
+                  (click)="changeQuantity(item, 1)"
+                  [disabled]="isUpdatingCart() || (item.quantity ?? 0) >= (item.product?.stock ?? 0)"
+                  aria-label="Increase quantity">
+                  <mat-icon>add</mat-icon>
+                </button>
+                <button mat-icon-button class="remove-btn" id="remove-item-{{ item.product?.id }}"
+                  (click)="removeFromCart(item)"
+                  [disabled]="isUpdatingCart()"
+                  aria-label="Remove item">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Cart totals -->
+            <div class="cart-totals">
+              <span class="cart-total-label" i18n="@@cartTotalLabel">Total</span>
+              <span class="cart-total-amount">\${{ cartState.totalPrice().toFixed(2) }}</span>
             </div>
           </div>
         </div>
-      </div>
+
+        <!-- Cart footer with Checkout button -->
+        <div class="cart-sidebar-footer">
+          <button mat-raised-button color="primary" id="checkout-btn"
+            class="checkout-btn" (click)="checkout()"
+            [disabled]="cartState.itemCount() === 0 || isCheckingOut() || !authState.isAuthenticated()">
+            <mat-spinner *ngIf="isCheckingOut()" diameter="18" class="checkout-spinner"></mat-spinner>
+            <mat-icon *ngIf="!isCheckingOut()">shopping_bag</mat-icon>
+            <span i18n="@@buyNowBtn">Buy Now</span>
+          </button>
+          <p *ngIf="!authState.isAuthenticated()" class="login-to-checkout" i18n="@@loginToCheckout">
+            <a routerLink="/login">Login</a> to checkout
+          </p>
+        </div>
+      </aside>
     </div>
   `,
   styles: [`
@@ -237,18 +290,44 @@ import { AuthStateService } from '../../core/state/auth-state.service';
       background-color: #cbd5e1 !important;
       color: #64748b !important;
     }
+    /* Cart Overlay */
+    .cart-sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 99;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      /* button reset */
+      border: none;
+      padding: 0;
+      margin: 0;
+      cursor: default;
+      border-radius: 0;
+    }
+    .cart-sidebar-overlay.open {
+      display: block;
+      opacity: 1;
+    }
+    /* Cart Sidebar */
     .cart-sidebar {
       position: fixed;
       top: 0;
-      right: -320px;
-      width: 320px;
+      right: -380px;
+      width: 380px;
       height: 100vh;
       background-color: white;
-      box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
       z-index: 100;
       transition: right 0.3s ease-in-out;
       display: flex;
       flex-direction: column;
+
+      @media (max-width: 480px) {
+        width: 100vw;
+        right: -100vw;
+      }
     }
     .cart-sidebar.open {
       right: 0;
@@ -257,10 +336,16 @@ import { AuthStateService } from '../../core/state/auth-state.service';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px;
+      padding: 16px 20px;
+    }
+    .cart-sidebar-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
     }
     .cart-sidebar-content {
-      padding: 16px;
+      padding: 16px 20px;
       flex-grow: 1;
       overflow-y: auto;
     }
@@ -272,47 +357,158 @@ import { AuthStateService } from '../../core/state/auth-state.service';
       color: #94a3b8;
     }
     .cart-empty-icon {
-      font-size: 36px;
-      width: 36px;
-      height: 36px;
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
       margin-bottom: 12px;
     }
-    .cart-summary-totals {
+    /* Cart items */
+    .cart-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .cart-item-info {
       display: flex;
       justify-content: space-between;
-      margin-top: 24px;
-      font-size: 15px;
+      align-items: flex-start;
+    }
+    .cart-item-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+      flex: 1;
+      padding-right: 8px;
+    }
+    .cart-item-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: #059669;
+      white-space: nowrap;
+    }
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .qty-btn {
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+    }
+    .qty-btn .mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+    .cart-item-qty {
+      font-size: 14px;
+      font-weight: 600;
+      min-width: 24px;
+      text-align: center;
+    }
+    .remove-btn {
+      margin-left: auto;
+      color: #ef4444 !important;
+    }
+    /* Cart totals */
+    .cart-totals {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0 8px 0;
+    }
+    .cart-total-label {
+      font-size: 16px;
+      font-weight: 600;
+      color: #334155;
+    }
+    .cart-total-amount {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    /* Cart footer */
+    .cart-sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .checkout-btn {
+      width: 100%;
+      height: 48px;
+      font-size: 16px;
+      font-weight: 700;
+      background-color: #059669 !important;
+      color: white !important;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .checkout-btn[disabled] {
+      background-color: #cbd5e1 !important;
+      color: #64748b !important;
+    }
+    .checkout-spinner {
+      display: inline-block;
+    }
+    .login-to-checkout {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .login-to-checkout a {
+      color: #059669;
+      font-weight: 600;
+      text-decoration: none;
     }
   `]
 })
 export class CatalogComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
+  private readonly cartApiService = inject(CartApiService);
+  private readonly ordersService = inject(OrdersService);
   public readonly cartState = inject(CartStateService);
   public readonly authState = inject(AuthStateService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly platformId = inject(PLATFORM_ID);
 
-  public readonly searchQuery = signal<string>('');
-  public readonly selectedCategory = signal<string>('');
+  public searchQuery = '';
+  public selectedCategory = '';
   public readonly products = signal<Array<ProductDto>>([]);
   public readonly categories = signal<Array<string>>([]);
   public readonly isLoading = signal<boolean>(false);
   public readonly isCartOpen = signal<boolean>(false);
+  public readonly isAddingToCart = signal<boolean>(false);
+  public readonly isUpdatingCart = signal<boolean>(false);
+  public readonly isCheckingOut = signal<boolean>(false);
 
   public ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      if (params['cartOpen'] === 'true') {
-        this.isCartOpen.set(true);
-      }
-    });
+    // Only execute search/query operations in browser environment (not SSR)
+    if (isPlatformBrowser(this.platformId)) {
+      this.route.queryParams.subscribe(params => {
+        if (params['cartOpen'] === 'true') {
+          this.isCartOpen.set(true);
+        }
+      });
 
-    this.loadProducts();
-    this.loadCategories();
+      this.loadProducts();
+      this.loadCategories();
+    }
   }
 
+  /** Load paginated products from backend query endpoint. */
   public loadProducts(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     this.isLoading.set(true);
-    this.productsService.getProducts(this.searchQuery(), this.selectedCategory()).subscribe({
+    this.productsService.getProducts(this.searchQuery, this.selectedCategory).subscribe({
       next: (data) => {
         this.products.set(data);
         this.isLoading.set(false);
@@ -325,8 +521,10 @@ export class CatalogComponent implements OnInit {
     });
   }
 
+  /** Load unique category list from backend product catalog. */
   public loadCategories(): void {
-    // Generate unique category items from pre-defined mock or fetch
+    if (!isPlatformBrowser(this.platformId)) return;
+
     this.productsService.getProducts().subscribe({
       next: (data) => {
         const uniqueCategories = Array.from(new Set(data.map(p => p.category).filter(Boolean) as string[]));
@@ -343,31 +541,85 @@ export class CatalogComponent implements OnInit {
     this.loadProducts();
   }
 
+  /** Add item to cart via Redis-backed backend API. */
   public addToCart(product: ProductDto): void {
-    // In Phase 3, we mock adding to the cart using local storage or temporary cart DTO
-    // In Phase 4, we will hook this up with the Redis backed Cart API
-    const currentItems = this.cartState.cart()?.items || [];
-    const existingIndex = currentItems.findIndex(i => i.product?.id === product.id);
-    const updatedItems = [...currentItems];
-
-    if (existingIndex > -1) {
-      const quantity = (updatedItems[existingIndex].quantity ?? 0) + 1;
-      updatedItems[existingIndex] = {
-        ...updatedItems[existingIndex],
-        quantity
-      };
-    } else {
-      updatedItems.push({
-        product,
-        quantity: 1
-      });
+    if (!this.authState.isAuthenticated()) {
+      this.snackBar.open('Please login to add items to your cart.', 'Login', { duration: 3000 })
+        .onAction().subscribe(() => this.router.navigate(['/login']));
+      return;
     }
 
-    const totalPrice = updatedItems.reduce((acc, i) => acc + (i.quantity * (i.product?.price ?? 0)), 0);
-    this.cartState.setCart({ items: updatedItems, totalPrice });
+    this.isAddingToCart.set(true);
+    const existingItem = this.cartState.cart()?.items?.find(i => i.product?.id === product.id);
+    const newQty = (existingItem?.quantity ?? 0) + 1;
 
-    this.snackBar.open(`${product.name} added to cart!`, 'View Cart', { duration: 3000 })
-      .onAction().subscribe(() => this.isCartOpen.set(true));
+    this.cartApiService.updateCartItem({ productId: product.id!, quantity: newQty }).subscribe({
+      next: (cart) => {
+        this.cartState.setCart(cart);
+        this.isAddingToCart.set(false);
+        this.snackBar.open(`${product.name} added to cart!`, 'View Cart', { duration: 2500 })
+          .onAction().subscribe(() => this.isCartOpen.set(true));
+      },
+      error: (err) => {
+        this.isAddingToCart.set(false);
+        const msg = err?.error?.detail ?? 'Could not add item. Please try again.';
+        this.snackBar.open(msg, 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  /** Change the quantity of a cart item up or down by a delta. */
+  public changeQuantity(item: CartItemDto, delta: number): void {
+    const newQty = (item.quantity ?? 0) + delta;
+    if (!item.product?.id) return;
+
+    this.isUpdatingCart.set(true);
+    this.cartApiService.updateCartItem({ productId: item.product.id, quantity: newQty }).subscribe({
+      next: (cart) => {
+        this.cartState.setCart(cart);
+        this.isUpdatingCart.set(false);
+      },
+      error: (err) => {
+        this.isUpdatingCart.set(false);
+        const msg = err?.error?.detail ?? 'Could not update cart.';
+        this.snackBar.open(msg, 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  /** Remove a specific item from the cart. */
+  public removeFromCart(item: CartItemDto): void {
+    if (!item.product?.id) return;
+
+    this.isUpdatingCart.set(true);
+    this.cartApiService.removeCartItem(item.product.id).subscribe({
+      next: (cart) => {
+        this.cartState.setCart(cart);
+        this.isUpdatingCart.set(false);
+      },
+      error: () => {
+        this.isUpdatingCart.set(false);
+        this.snackBar.open('Could not remove item.', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  /** Submit checkout order and redirect to success page on completion. */
+  public checkout(): void {
+    this.isCheckingOut.set(true);
+    this.ordersService.checkout().subscribe({
+      next: (order) => {
+        this.cartState.clearCart();
+        this.isCheckingOut.set(false);
+        this.isCartOpen.set(false);
+        this.router.navigate(['/checkout/success'], { state: { order } });
+      },
+      error: (err) => {
+        this.isCheckingOut.set(false);
+        const msg = err?.error?.detail ?? err?.error?.message ?? 'Checkout failed. Please try again.';
+        this.snackBar.open(msg, 'Close', { duration: 5000 });
+      }
+    });
   }
 
   public closeCart(): void {
