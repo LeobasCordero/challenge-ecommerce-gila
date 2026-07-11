@@ -3,11 +3,11 @@ package com.gila.ecommerce.service;
 import com.gila.ecommerce.dto.CartDto;
 import com.gila.ecommerce.dto.CartItemDto;
 import com.gila.ecommerce.dto.CartItemRequestDto;
+import com.gila.ecommerce.dto.ProductDto;
+import com.gila.ecommerce.exception.ErrorMessages;
 import com.gila.ecommerce.model.Product;
 import com.gila.ecommerce.repository.ProductRepository;
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,13 +16,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Temporary in-memory CartService implementation caching carts in thread-safe collections.
+ * Thread-safe temporary shopping cart service in-memory store before Redis migration.
  */
 @Service
 public class InMemoryCartService implements CartService {
 
-    private final ProductRepository productRepository;
     private final Map<String, Map<UUID, Integer>> carts = new ConcurrentHashMap<>();
+    private final ProductRepository productRepository;
 
     /**
      * Constructor injecting ProductRepository.
@@ -33,76 +33,77 @@ public class InMemoryCartService implements CartService {
     }
 
     /**
-     * Retrieve the active shopping cart for a given username.
-     * @param username user lookup key
-     * @return active cart DTO
+     * Retrieve cart contents and sum total price for the active user session.
+     * @param username user key
+     * @return current shopping cart session contents DTO
      */
     @Override
     public CartDto getCart(String username) {
-        Map<UUID, Integer> userItems = carts.computeIfAbsent(username, k -> new ConcurrentHashMap<>());
-        CartDto cart = new CartDto();
-        List<CartItemDto> items = new ArrayList<>();
-        BigDecimal total = BigDecimal.ZERO;
+        Map<UUID, Integer> items = carts.computeIfAbsent(username, k -> new ConcurrentHashMap<>());
+        CartDto dto = new CartDto();
+        dto.setItems(new ArrayList<>());
+        double total = 0.0;
 
-        for (Map.Entry<UUID, Integer> entry : userItems.entrySet()) {
+        for (Map.Entry<UUID, Integer> entry : items.entrySet()) {
             Product product = productRepository.findById(entry.getKey()).orElse(null);
             if (product != null) {
-                CartItemDto item = new CartItemDto();
-                item.setProduct(ProductMapper.toDto(product));
-                item.setQuantity(entry.getValue());
-                items.add(item);
-                total = total.add(product.getPrice().multiply(BigDecimal.valueOf(entry.getValue())));
+                CartItemDto itemDto = new CartItemDto();
+                ProductDto prodDto = ProductMapper.toDto(product);
+                itemDto.setProduct(prodDto);
+                itemDto.setQuantity(entry.getValue());
+                dto.getItems().add(itemDto);
+                total += product.getPrice().doubleValue() * entry.getValue();
             }
         }
-        cart.setItems(items);
-        cart.setTotalPrice(total.doubleValue());
-        return cart;
+        dto.setTotalPrice(total);
+        return dto;
     }
 
     /**
-     * Add or update an item quantity in a user's cart.
-     * @param username user lookup key
-     * @param request cart item modification request
-     * @return updated cart DTO
+     * Set specific product quantity level in user cart.
+     * @param username user key
+     * @param request item request parameters
+     * @return updated shopping cart session contents DTO
      */
     @Override
     public CartDto updateCartItem(String username, CartItemRequestDto request) {
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.PRODUCT_NOT_FOUND));
 
         if (product.getStock() < request.getQuantity()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient stock");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessages.INSUFFICIENT_STOCK);
         }
 
-        Map<UUID, Integer> userItems = carts.computeIfAbsent(username, k -> new ConcurrentHashMap<>());
-        userItems.put(request.getProductId(), request.getQuantity());
-        return getCart(username);
-    }
-
-    /**
-     * Remove an item from a user's cart.
-     * @param username user lookup key
-     * @param productId target product to remove
-     * @return updated cart DTO
-     */
-    @Override
-    public CartDto removeCartItem(String username, UUID productId) {
-        Map<UUID, Integer> userItems = carts.get(username);
-        if (userItems != null) {
-            userItems.remove(productId);
+        Map<UUID, Integer> items = carts.computeIfAbsent(username, k -> new ConcurrentHashMap<>());
+        if (request.getQuantity() <= 0) {
+            items.remove(request.getProductId());
+        } else {
+            items.put(request.getProductId(), request.getQuantity());
         }
         return getCart(username);
     }
 
     /**
-     * Clear all items from a user's cart.
-     * @param username user lookup key
+     * Clear all cart items for user session.
+     * @param username user key
      */
     @Override
     public void clearCart(String username) {
-        Map<UUID, Integer> userItems = carts.get(username);
-        if (userItems != null) {
-            userItems.clear();
+        carts.remove(username);
+    }
+
+    /**
+     * Remove specific product item from user cart.
+     * @param username user key
+     * @param productId target product identifier
+     * @return updated shopping cart session contents DTO
+     */
+    @Override
+    public CartDto removeCartItem(String username, UUID productId) {
+        Map<UUID, Integer> items = carts.get(username);
+        if (items != null) {
+            items.remove(productId);
         }
+        return getCart(username);
     }
 }
