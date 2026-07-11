@@ -19,6 +19,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent)
   },
   {
+    path: 'checkout/success',
+    loadComponent: () => import('./features/checkout/checkout-success.component').then(m => m.CheckoutSuccessComponent)
+  },
+  {
     path: '**',
     redirectTo: 'catalog'
   }
