@@ -19,7 +19,7 @@ import jakarta.annotation.Generated;
  * ProductDto
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-07-10T23:03:24.260209300-06:00[GMT-06:00]", comments = "Generator version: 7.4.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-07-11T13:14:35.770236700-06:00[GMT-06:00]", comments = "Generator version: 7.4.0")
 public class ProductDto {
 
   private UUID id;
