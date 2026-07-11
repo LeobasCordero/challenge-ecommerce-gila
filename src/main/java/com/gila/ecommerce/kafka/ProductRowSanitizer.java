@@ -1,6 +1,7 @@
 package com.gila.ecommerce.kafka;
 
 import com.gila.ecommerce.dto.ProductDto;
+import com.gila.ecommerce.exception.ErrorMessages;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ public class ProductRowSanitizer {
     public SanitizedRow sanitize(String[] row, int rowIndex) {
         List<String> warnings = new ArrayList<>();
         if (row == null || row.length < 5) {
-            warnings.add("Row " + rowIndex + " contains insufficient columns. Expected 5.");
+            warnings.add(ErrorMessages.ROW_PREFIX + rowIndex + ErrorMessages.INSUFFICIENT_COLUMNS);
             return new SanitizedRow(null, warnings, false);
         }
 
@@ -36,7 +37,7 @@ public class ProductRowSanitizer {
                 || !StringUtils.hasText(priceStr)
                 || !StringUtils.hasText(stockStr)
                 || !StringUtils.hasText(category)) {
-            warnings.add("Row " + rowIndex + " contains empty required fields.");
+            warnings.add(ErrorMessages.ROW_PREFIX + rowIndex + ErrorMessages.EMPTY_REQUIRED_FIELDS);
             return new SanitizedRow(null, warnings, false);
         }
 
@@ -53,7 +54,7 @@ public class ProductRowSanitizer {
             try {
                 price = Double.parseDouble(cleanPrice);
             } catch (NumberFormatException e) {
-                warnings.add("Row " + rowIndex + " has invalid price format: '" + priceStr + "'.");
+                warnings.add(ErrorMessages.ROW_PREFIX + rowIndex + ErrorMessages.INVALID_PRICE_FORMAT + priceStr + "'.");
                 return new SanitizedRow(null, warnings, false);
             }
         }
@@ -62,13 +63,13 @@ public class ProductRowSanitizer {
         try {
             stock = Integer.parseInt(stockStr.trim());
         } catch (NumberFormatException e) {
-            warnings.add("Row " + rowIndex + " has invalid stock format: '" + stockStr + "'.");
+            warnings.add(ErrorMessages.ROW_PREFIX + rowIndex + ErrorMessages.INVALID_STOCK_FORMAT + stockStr + "'.");
             return new SanitizedRow(null, warnings, false);
         }
 
         if (stock < 0) {
-            warnings.add("Row " + rowIndex + ": Stock for '" + sanitizedName
-                    + "' was negative (" + stock + "). Clamped to 0.");
+            warnings.add(ErrorMessages.ROW_PREFIX + rowIndex + ErrorMessages.NEGATIVE_STOCK_PREFIX + sanitizedName
+                    + ErrorMessages.NEGATIVE_STOCK_MIDDLE + stock + ErrorMessages.NEGATIVE_STOCK_SUFFIX);
             stock = 0;
         }
 

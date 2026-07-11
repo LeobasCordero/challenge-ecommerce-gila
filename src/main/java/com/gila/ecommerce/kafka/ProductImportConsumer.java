@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gila.ecommerce.dto.ProductDto;
 import com.gila.ecommerce.dto.ProductImportStatusDto;
+import com.gila.ecommerce.exception.ErrorMessages;
 import com.gila.ecommerce.service.AuditLogService;
 import com.gila.ecommerce.service.ProductImportService;
 import com.gila.ecommerce.util.AuditAction;
@@ -137,7 +138,7 @@ public class ProductImportConsumer {
                 try {
                     ProductImportStatusDto status = importService.getImportStatus(taskId);
                     status.setStatus(ImportStatus.FAILED.getValue());
-                    status.getWarnings().add("Critical system error: " + e.getMessage());
+                    status.getWarnings().add(ErrorMessages.CRITICAL_SYSTEM_ERROR_PREFIX + e.getMessage());
                     importService.updateStatus(taskId, status);
                     kafkaTemplate.send(
                             importStatusTopic, taskId.toString(),
