@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gila.ecommerce.dto.ProductDto;
 import com.gila.ecommerce.dto.ProductImportStatusDto;
+import com.gila.ecommerce.service.AuditLogService;
 import com.gila.ecommerce.service.ProductImportService;
+import com.gila.ecommerce.util.AuditAction;
+import com.gila.ecommerce.util.AuditStatus;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,6 +30,7 @@ public class ProductImportConsumer {
     private final ProductRowSanitizer rowSanitizer;
     private final ProductImportProcessor importProcessor;
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final AuditLogService auditLogService;
     private final ObjectMapper objectMapper;
 
     /**
@@ -36,6 +40,7 @@ public class ProductImportConsumer {
      * @param rowSanitizer validator/sanitizer
      * @param importProcessor DB persistent writer
      * @param kafkaTemplate kafka event publisher
+     * @param auditLogService audit logging service interface
      * @param objectMapper JSON serialization mapper
      */
     public ProductImportConsumer(
@@ -44,6 +49,7 @@ public class ProductImportConsumer {
             ProductRowSanitizer rowSanitizer,
             ProductImportProcessor importProcessor,
             KafkaTemplate<String, String> kafkaTemplate,
+            AuditLogService auditLogService,
             ObjectMapper objectMapper
     ) {
         this.importService = importService;
@@ -51,6 +57,7 @@ public class ProductImportConsumer {
         this.rowSanitizer = rowSanitizer;
         this.importProcessor = importProcessor;
         this.kafkaTemplate = kafkaTemplate;
+        this.auditLogService = auditLogService;
         this.objectMapper = objectMapper;
     }
 
@@ -62,16 +69,25 @@ public class ProductImportConsumer {
     public void consumeImportRequest(String message) {
         UUID taskId = null;
         String filePath = null;
+        String username = "system";
         try {
             Map<String, String> event = objectMapper.readValue(
                     message, new TypeReference<Map<String, String>>() {}
             );
             taskId = UUID.fromString(event.get("taskId"));
             filePath = event.get("filePath");
+            username = event.getOrDefault("username", "system");
 
             ProductImportStatusDto status = importService.getImportStatus(taskId);
             status.setStatus("PROCESSING");
             importService.updateStatus(taskId, status);
+
+            auditLogService.log(
+                    username,
+                    AuditAction.CSV_IMPORT_START.getValue(),
+                    AuditStatus.SUCCESS.getValue(),
+                    Map.of("taskId", taskId.toString())
+            );
 
             List<String[]> rows = csvParser.parse(filePath);
             status.setTotalRows(rows.size());
@@ -104,6 +120,13 @@ public class ProductImportConsumer {
                     objectMapper.writeValueAsString(status)
             );
 
+            auditLogService.log(
+                    username,
+                    AuditAction.CSV_IMPORT_COMPLETE.getValue(),
+                    AuditStatus.SUCCESS.getValue(),
+                    Map.of("taskId", taskId.toString(), "processedRows", status.getProcessedRows())
+            );
+
         } catch (Exception e) {
             if (taskId != null) {
                 try {
@@ -119,6 +142,12 @@ public class ProductImportConsumer {
                     // fall through
                 }
             }
+            auditLogService.log(
+                    username,
+                    AuditAction.CSV_IMPORT_FAILED.getValue(),
+                    AuditStatus.FAILURE.getValue(),
+                    Map.of("error", e.getMessage())
+            );
         } finally {
             if (filePath != null) {
                 try {

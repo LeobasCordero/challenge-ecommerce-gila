@@ -22,6 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import com.gila.ecommerce.util.AuditAction;
+import com.gila.ecommerce.util.AuditStatus;
 
 /**
  * Service implementation processing transactional checkouts and order history resets.
@@ -71,7 +73,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         CartDto cart = cartService.getCart(username);
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
             ResponseStatusException ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
-            auditLogService.log(username, "CHECKOUT", "FAILURE", Map.of("reason", "Cart is empty"));
+            auditLogService.log(username, AuditAction.CHECKOUT.getValue(), AuditStatus.FAILURE.getValue(), Map.of("reason", "Cart is empty"));
             throw ex;
         }
 
@@ -92,7 +94,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                         ResponseStatusException ex = new ResponseStatusException(
                                 HttpStatus.BAD_REQUEST, "Product not found: " + productId
                         );
-                        auditLogService.log(username, "CHECKOUT", "FAILURE", Map.of("reason", "Product not found: " + productId));
+                        auditLogService.log(username, AuditAction.CHECKOUT.getValue(), AuditStatus.FAILURE.getValue(), Map.of("reason", "Product not found: " + productId));
                         return ex;
                     });
 
@@ -100,7 +102,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 ResponseStatusException ex = new ResponseStatusException(
                         HttpStatus.BAD_REQUEST, "Insufficient stock for product: " + product.getName()
                 );
-                auditLogService.log(username, "CHECKOUT", "FAILURE", Map.of("reason", "Insufficient stock for product: " + product.getName()));
+                auditLogService.log(username, AuditAction.CHECKOUT.getValue(), AuditStatus.FAILURE.getValue(), Map.of("reason", "Insufficient stock for product: " + product.getName()));
                 throw ex;
             }
 
@@ -124,7 +126,7 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         cartService.clearCart(username);
 
-        auditLogService.log(username, "CHECKOUT", "SUCCESS", Map.of(
+        auditLogService.log(username, AuditAction.CHECKOUT.getValue(), AuditStatus.SUCCESS.getValue(), Map.of(
                 "orderId", orderId.toString(),
                 "totalPrice", total.doubleValue()
         ));
