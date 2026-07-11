@@ -1,0 +1,10 @@
+delete:
+  tags:
+    - Orders
+  summary: Truncate database orders and reset system inventory defaults (Admin only)
+  operationId: clearOrders
+  responses:
+    '204':
+      description: Orders database reset completed successfully
+    '403':
+      description: Forbidden (requires admin role)

@@ -1,0 +1,19 @@
+LoginRequestDto:
+  type: object
+  required:
+    - username
+    - password
+  properties:
+    username:
+      type: string
+    password:
+      type: string
+
+LoginResponseDto:
+  type: object
+  required:
+    - token
+  properties:
+    token:
+      type: string
+      description: JWT Bearer authentication token

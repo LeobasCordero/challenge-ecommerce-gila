@@ -1,16 +1,1 @@
-com\gila\ecommerce\dto\ProductDto.class
-com\gila\ecommerce\api\OrdersApi.class
-com\gila\ecommerce\dto\LoginResponseDto.class
-com\gila\ecommerce\api\AuthApi.class
-com\gila\ecommerce\dto\OrderItemDto.class
 com\gila\ecommerce\ECommerceApplication.class
-com\gila\ecommerce\dto\ImportProducts202Response.class
-com\gila\ecommerce\api\DefaultApi.class
-com\gila\ecommerce\dto\CartDto.class
-com\gila\ecommerce\dto\OrderDto.class
-com\gila\ecommerce\dto\CartItemRequestDto.class
-com\gila\ecommerce\api\CartApi.class
-com\gila\ecommerce\api\ApiUtil.class
-com\gila\ecommerce\dto\ProductImportStatusDto.class
-com\gila\ecommerce\dto\CartItemDto.class
-com\gila\ecommerce\dto\LoginRequestDto.class
