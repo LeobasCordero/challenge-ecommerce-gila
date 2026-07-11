@@ -3,17 +3,27 @@ package com.gila.ecommerce.controller;
 import com.gila.ecommerce.api.CartApi;
 import com.gila.ecommerce.dto.CartDto;
 import com.gila.ecommerce.dto.CartItemRequestDto;
+import com.gila.ecommerce.service.CartService;
+import java.util.UUID;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.UUID;
-
 /**
- * Controller stub implementing shopping cart cache operations.
+ * Controller implementing shopping cart REST endpoints.
  */
 @RestController
 public class CartController implements CartApi {
+
+    private final CartService cartService;
+
+    /**
+     * Constructor injecting CartService.
+     * @param cartService shopping cart service interface
+     */
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
 
     /**
      * Clear all items from active shopping cart context.
@@ -21,6 +31,7 @@ public class CartController implements CartApi {
      */
     @Override
     public ResponseEntity<Void> clearCart() {
+        cartService.clearCart(getAuthenticatedUsername());
         return ResponseEntity.noContent().build();
     }
 
@@ -30,10 +41,7 @@ public class CartController implements CartApi {
      */
     @Override
     public ResponseEntity<CartDto> getCart() {
-        CartDto cart = new CartDto();
-        cart.setItems(new ArrayList<>());
-        cart.setTotalPrice(0.0);
-        return ResponseEntity.ok(cart);
+        return ResponseEntity.ok(cartService.getCart(getAuthenticatedUsername()));
     }
 
     /**
@@ -43,10 +51,7 @@ public class CartController implements CartApi {
      */
     @Override
     public ResponseEntity<CartDto> removeCartItem(UUID productId) {
-        CartDto cart = new CartDto();
-        cart.setItems(new ArrayList<>());
-        cart.setTotalPrice(0.0);
-        return ResponseEntity.ok(cart);
+        return ResponseEntity.ok(cartService.removeCartItem(getAuthenticatedUsername(), productId));
     }
 
     /**
@@ -56,9 +61,14 @@ public class CartController implements CartApi {
      */
     @Override
     public ResponseEntity<CartDto> updateCartItem(CartItemRequestDto cartItemRequestDto) {
-        CartDto cart = new CartDto();
-        cart.setItems(new ArrayList<>());
-        cart.setTotalPrice(0.0);
-        return ResponseEntity.ok(cart);
+        return ResponseEntity.ok(cartService.updateCartItem(getAuthenticatedUsername(), cartItemRequestDto));
+    }
+
+    /**
+     * Retrieve authenticated username context.
+     * @return username key from security principal
+     */
+    private String getAuthenticatedUsername() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 }

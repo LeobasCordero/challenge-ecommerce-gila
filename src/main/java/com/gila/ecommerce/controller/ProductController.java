@@ -4,36 +4,45 @@ import com.gila.ecommerce.api.ProductsApi;
 import com.gila.ecommerce.dto.ImportProducts202Response;
 import com.gila.ecommerce.dto.ProductDto;
 import com.gila.ecommerce.dto.ProductImportStatusDto;
+import com.gila.ecommerce.service.ProductImportService;
+import com.gila.ecommerce.service.ProductService;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 /**
- * Controller stub implementing products REST catalog endpoints.
+ * Controller implementing products REST catalog endpoints.
  */
 @RestController
 public class ProductController implements ProductsApi {
 
+    private final ProductService productService;
+    private final ProductImportService productImportService;
+
+    /**
+     * Constructor injecting dependencies.
+     * @param productService product catalog business service
+     * @param productImportService CSV import pipeline service
+     */
+    public ProductController(
+            ProductService productService,
+            ProductImportService productImportService
+    ) {
+        this.productService = productService;
+        this.productImportService = productImportService;
+    }
+
     /**
      * Create a new product.
      * @param productDto details of product to create
-     * @return the created product details
+     * @return response containing the created product details
      */
     @Override
     public ResponseEntity<ProductDto> createProduct(ProductDto productDto) {
-        ProductDto created = new ProductDto();
-        created.setId(UUID.randomUUID());
-        created.setName(productDto.getName());
-        created.setDescription(productDto.getDescription());
-        created.setPrice(productDto.getPrice());
-        created.setStock(productDto.getStock());
-        created.setCategory(productDto.getCategory());
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productDto));
     }
 
     /**
@@ -43,6 +52,7 @@ public class ProductController implements ProductsApi {
      */
     @Override
     public ResponseEntity<Void> deleteProduct(UUID id) {
+        productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -53,14 +63,7 @@ public class ProductController implements ProductsApi {
      */
     @Override
     public ResponseEntity<ProductImportStatusDto> getImportStatus(UUID taskId) {
-        ProductImportStatusDto status = new ProductImportStatusDto();
-        status.setTaskId(taskId);
-        status.setStatus("COMPLETED");
-        status.setTotalRows(100);
-        status.setProcessedRows(95);
-        status.setErrorCount(5);
-        status.setWarnings(new ArrayList<>());
-        return ResponseEntity.ok(status);
+        return ResponseEntity.ok(productImportService.getImportStatus(taskId));
     }
 
     /**
@@ -70,14 +73,7 @@ public class ProductController implements ProductsApi {
      */
     @Override
     public ResponseEntity<ProductDto> getProductById(UUID id) {
-        ProductDto product = new ProductDto();
-        product.setId(id);
-        product.setName("Mock Product");
-        product.setDescription("Mock Description");
-        product.setPrice(9.99);
-        product.setStock(50);
-        product.setCategory("Books");
-        return ResponseEntity.ok(product);
+        return ResponseEntity.ok(productService.getProductById(id));
     }
 
     /**
@@ -89,17 +85,13 @@ public class ProductController implements ProductsApi {
      * @return list of matching products
      */
     @Override
-    public ResponseEntity<List<ProductDto>> getProducts(String query, String category, Integer page, Integer size) {
-        List<ProductDto> list = new ArrayList<>();
-        ProductDto item = new ProductDto();
-        item.setId(UUID.randomUUID());
-        item.setName("Sample Item");
-        item.setDescription("Sample Description");
-        item.setPrice(19.99);
-        item.setStock(10);
-        item.setCategory("Electronics");
-        list.add(item);
-        return ResponseEntity.ok(list);
+    public ResponseEntity<List<ProductDto>> getProducts(
+            String query,
+            String category,
+            Integer page,
+            Integer size
+    ) {
+        return ResponseEntity.ok(productService.getProducts(query, category, page, size));
     }
 
     /**
@@ -109,10 +101,7 @@ public class ProductController implements ProductsApi {
      */
     @Override
     public ResponseEntity<ImportProducts202Response> importProducts(MultipartFile file) {
-        ImportProducts202Response response = new ImportProducts202Response();
-        response.setTaskId(UUID.randomUUID());
-        response.setStatus("PENDING");
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(productImportService.importProducts(file));
     }
 
     /**
@@ -123,13 +112,6 @@ public class ProductController implements ProductsApi {
      */
     @Override
     public ResponseEntity<ProductDto> updateProduct(UUID id, ProductDto productDto) {
-        ProductDto updated = new ProductDto();
-        updated.setId(id);
-        updated.setName(productDto.getName());
-        updated.setDescription(productDto.getDescription());
-        updated.setPrice(productDto.getPrice());
-        updated.setStock(productDto.getStock());
-        updated.setCategory(productDto.getCategory());
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(productService.updateProduct(id, productDto));
     }
 }
