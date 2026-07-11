@@ -1,6 +1,7 @@
 package com.gila.ecommerce.kafka;
 
 import com.gila.ecommerce.dto.ProductDto;
+import com.gila.ecommerce.exception.ErrorMessages;
 import com.gila.ecommerce.model.Product;
 import com.gila.ecommerce.repository.ProductRepository;
 import com.gila.ecommerce.service.ProductMapper;
@@ -36,8 +37,7 @@ public class ProductImportProcessor {
         List<String> warnings = new ArrayList<>();
         for (ProductDto dto : dtos) {
             if (productRepository.findByName(dto.getName()).isPresent()) {
-                warnings.add("Product with name '" + dto.getName()
-                        + "' already exists. Duplicate ignored.");
+                warnings.add(ErrorMessages.DUPLICATE_PRODUCT_PREFIX + dto.getName() + ErrorMessages.DUPLICATE_PRODUCT_SUFFIX);
                 continue;
             }
             Product product = ProductMapper.toEntity(dto);
