@@ -22,6 +22,7 @@ C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\target\generated-source
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\service\ProductImportServiceImpl.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\kafka\SanitizedRow.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\controller\AuthController.java
+C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\util\AuditStatus.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\security\SecurityConfig.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\controller\CartController.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\service\ProductMapper.java
@@ -47,6 +48,7 @@ C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\model\AuditLog.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\service\ProductService.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\kafka\AuditLogConsumer.java
+C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\util\AuditAction.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\target\generated-sources\openapi\src\main\java\com\gila\ecommerce\api\ProductsApi.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\security\JwtTokenProvider.java
 C:\Users\leocg\Documents\GitHub\challenge-ecommerce-gila\src\main\java\com\gila\ecommerce\service\CartService.java
