@@ -8,6 +8,7 @@ import com.gila.ecommerce.service.AuditLogService;
 import com.gila.ecommerce.service.ProductImportService;
 import com.gila.ecommerce.util.AuditAction;
 import com.gila.ecommerce.util.AuditStatus;
+import com.gila.ecommerce.util.ImportStatus;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,9 @@ public class ProductImportConsumer {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final AuditLogService auditLogService;
     private final ObjectMapper objectMapper;
+
+    @Value("${app.kafka.topics.import-status}")
+    private String importStatusTopic;
 
     /**
      * Constructor injecting dependencies.
@@ -65,7 +70,7 @@ public class ProductImportConsumer {
      * Consume import request event payload sequentially.
      * @param message JSON payload containing taskId and filePath
      */
-    @KafkaListener(topics = "product-import-request", groupId = "ecommerce-group")
+    @KafkaListener(topics = "${app.kafka.topics.import-request}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeImportRequest(String message) {
         UUID taskId = null;
         String filePath = null;
@@ -79,7 +84,7 @@ public class ProductImportConsumer {
             username = event.getOrDefault("username", "system");
 
             ProductImportStatusDto status = importService.getImportStatus(taskId);
-            status.setStatus("PROCESSING");
+            status.setStatus(ImportStatus.PROCESSING.getValue());
             importService.updateStatus(taskId, status);
 
             auditLogService.log(
@@ -112,11 +117,11 @@ public class ProductImportConsumer {
             status.setErrorCount(errorCount + dbWarnings.size());
             status.setProcessedRows(validDtos.size() - dbWarnings.size());
             status.setWarnings(warnings);
-            status.setStatus("COMPLETED");
+            status.setStatus(ImportStatus.COMPLETED.getValue());
 
             importService.updateStatus(taskId, status);
             kafkaTemplate.send(
-                    "product-import-status", taskId.toString(),
+                    importStatusTopic, taskId.toString(),
                     objectMapper.writeValueAsString(status)
             );
 
@@ -131,11 +136,11 @@ public class ProductImportConsumer {
             if (taskId != null) {
                 try {
                     ProductImportStatusDto status = importService.getImportStatus(taskId);
-                    status.setStatus("FAILED");
+                    status.setStatus(ImportStatus.FAILED.getValue());
                     status.getWarnings().add("Critical system error: " + e.getMessage());
                     importService.updateStatus(taskId, status);
                     kafkaTemplate.send(
-                            "product-import-status", taskId.toString(),
+                            importStatusTopic, taskId.toString(),
                             objectMapper.writeValueAsString(status)
                     );
                 } catch (Exception ex) {

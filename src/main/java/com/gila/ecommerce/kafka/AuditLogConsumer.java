@@ -11,7 +11,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Kafka listener consuming audit event payloads and persisting records.
+ * Kafka listener consuming audit events and saving them to the database.
  */
 @Component
 public class AuditLogConsumer {
@@ -20,9 +20,9 @@ public class AuditLogConsumer {
     private final ObjectMapper objectMapper;
 
     /**
-     * Constructor injecting repository and mapper.
-     * @param auditLogRepository audit log database interface
-     * @param objectMapper json mapper instance
+     * Constructor injecting dependencies.
+     * @param auditLogRepository audit log repository
+     * @param objectMapper json serialization mapper
      */
     public AuditLogConsumer(
             AuditLogRepository auditLogRepository,
@@ -33,28 +33,30 @@ public class AuditLogConsumer {
     }
 
     /**
-     * Consume audit event and save to the database.
-     * @param message JSON event payload
+     * Consume audit log event and persist to database.
+     * @param message raw JSON payload from Kafka
      */
-    @SuppressWarnings("unchecked")
-    @KafkaListener(topics = "audit-log", groupId = "ecommerce-group")
+    @KafkaListener(topics = "${app.kafka.topics.audit-log}", groupId = "${spring.kafka.consumer.group-id}")
     public void consumeAuditLog(String message) {
         try {
-            Map<String, Object> event = objectMapper.readValue(
+            Map<String, Object> payload = objectMapper.readValue(
                     message, new TypeReference<Map<String, Object>>() {}
             );
 
             AuditLog log = new AuditLog();
-            log.setId(UUID.fromString((String) event.get("id")));
-            log.setTimestamp(OffsetDateTime.parse((String) event.get("timestamp")));
-            log.setUsername((String) event.get("username"));
-            log.setActionType((String) event.get("actionType"));
-            log.setStatus((String) event.get("status"));
-            log.setDetails((Map<String, Object>) event.get("details"));
+            log.setId(UUID.fromString((String) payload.get("id")));
+            log.setUsername((String) payload.get("username"));
+            log.setActionType((String) payload.get("action"));
+            log.setStatus((String) payload.get("status"));
+            log.setTimestamp(OffsetDateTime.parse((String) payload.get("timestamp")));
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> metadata = (Map<String, Object>) payload.get("metadata");
+            log.setDetails(metadata);
 
             auditLogRepository.save(log);
         } catch (Exception e) {
-            // fail-safe logging consumer to prevent system message listener blocks
+            // fall through
         }
     }
 }
