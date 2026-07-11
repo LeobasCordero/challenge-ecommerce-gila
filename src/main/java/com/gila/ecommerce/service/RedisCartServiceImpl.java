@@ -6,6 +6,7 @@ import com.gila.ecommerce.dto.CartItemRequestDto;
 import com.gila.ecommerce.exception.ErrorMessages;
 import com.gila.ecommerce.model.Product;
 import com.gila.ecommerce.repository.ProductRepository;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
@@ -49,7 +50,7 @@ public class RedisCartServiceImpl implements CartService {
 
         CartDto dto = new CartDto();
         dto.setItems(new ArrayList<>());
-        double total = 0.0;
+        BigDecimal total = BigDecimal.ZERO;
 
         for (Map.Entry<Object, Object> entry : entries.entrySet()) {
             UUID productId = UUID.fromString((String) entry.getKey());
@@ -61,11 +62,11 @@ public class RedisCartServiceImpl implements CartService {
                 itemDto.setProduct(ProductMapper.toDto(product));
                 itemDto.setQuantity(quantity);
                 dto.getItems().add(itemDto);
-                total += product.getPrice().doubleValue() * quantity;
+                total = total.add(product.getPrice().multiply(BigDecimal.valueOf(quantity)));
             }
         }
 
-        dto.setTotalPrice(total);
+        dto.setTotalPrice(total.doubleValue());
         return dto;
     }
 

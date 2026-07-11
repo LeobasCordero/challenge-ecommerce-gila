@@ -26,3 +26,9 @@ replay_pid*
 # GSD Planning
 .planning/
 
+# Maven build output
+/target
+
+# Temporary import files
+temp-imports/
+

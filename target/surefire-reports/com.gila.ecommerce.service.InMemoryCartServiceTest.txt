@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.gila.ecommerce.service.InMemoryCartServiceTest
--------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 7, Time elapsed: 0.001 s -- in com.gila.ecommerce.service.InMemoryCartServiceTest
