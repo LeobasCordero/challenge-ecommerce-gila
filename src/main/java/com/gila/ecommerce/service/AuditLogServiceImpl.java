@@ -1,15 +1,17 @@
 package com.gila.ecommerce.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 /**
- * Service implementation publishing audit log events asynchronously to a Kafka topic.
+ * Service implementation publishing audit log events to the designated Kafka topic.
  */
 @Service
 public class AuditLogServiceImpl implements AuditLogService {
@@ -17,10 +19,13 @@ public class AuditLogServiceImpl implements AuditLogService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
+    @Value("${app.kafka.topics.audit-log}")
+    private String auditLogTopic;
+
     /**
-     * Constructor injecting dependencies.
-     * @param kafkaTemplate kafka Template utility
-     * @param objectMapper jackson ObjectMapper reference
+     * Constructor injecting KafkaTemplate and ObjectMapper.
+     * @param kafkaTemplate kafka template instance
+     * @param objectMapper JSON serialization mapper
      */
     public AuditLogServiceImpl(
             KafkaTemplate<String, String> kafkaTemplate,
@@ -31,32 +36,33 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     /**
-     * Log a security or core business transaction.
-     * @param username user who initiated the event
-     * @param actionType category of action performed
-     * @param status status of action (e.g. SUCCESS, FAILURE)
-     * @param details structured map containing metadata details
+     * Publish an audit event payload asynchronously.
+     * @param username user who performed the action
+     * @param action string identifier representing action category
+     * @param status transaction success status level
+     * @param metadata map of arbitrary key-value details relating to operation context
      */
     @Override
     public void log(
             String username,
-            String actionType,
+            String action,
             String status,
-            Map<String, Object> details
+            Map<String, Object> metadata
     ) {
-        try {
-            Map<String, Object> event = new HashMap<>();
-            event.put("id", UUID.randomUUID().toString());
-            event.put("timestamp", OffsetDateTime.now().toString());
-            event.put("username", username);
-            event.put("actionType", actionType);
-            event.put("status", status);
-            event.put("details", details);
+        String messageId = UUID.randomUUID().toString();
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("id", messageId);
+        payload.put("username", username);
+        payload.put("action", action);
+        payload.put("status", status);
+        payload.put("timestamp", OffsetDateTime.now().toString());
+        payload.put("metadata", metadata != null ? metadata : Map.of());
 
-            String payload = objectMapper.writeValueAsString(event);
-            kafkaTemplate.send("audit-log", payload);
-        } catch (Exception e) {
-            // fail-safe logging to avoid breaking main business processes
+        try {
+            String jsonPayload = objectMapper.writeValueAsString(payload);
+            kafkaTemplate.send(auditLogTopic, messageId, jsonPayload);
+        } catch (JsonProcessingException e) {
+            // fall through
         }
     }
 }

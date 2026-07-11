@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gila.ecommerce.dto.ImportProducts202Response;
 import com.gila.ecommerce.dto.ProductImportStatusDto;
 import com.gila.ecommerce.exception.ErrorMessages;
+import com.gila.ecommerce.util.ImportStatus;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +31,9 @@ public class ProductImportServiceImpl implements ProductImportService {
     private final ObjectMapper objectMapper;
     private final Map<UUID, ProductImportStatusDto> statuses = new ConcurrentHashMap<>();
     private final Path tempDir = Paths.get("temp-imports");
+
+    @Value("${app.kafka.topics.import-request}")
+    private String importRequestTopic;
 
     /**
      * Constructor injecting KafkaTemplate and ObjectMapper.
@@ -63,7 +68,7 @@ public class ProductImportServiceImpl implements ProductImportService {
 
             ProductImportStatusDto status = new ProductImportStatusDto();
             status.setTaskId(taskId);
-            status.setStatus("PENDING");
+            status.setStatus(ImportStatus.PENDING.getValue());
             status.setTotalRows(0);
             status.setProcessedRows(0);
             status.setErrorCount(0);
@@ -78,11 +83,11 @@ public class ProductImportServiceImpl implements ProductImportService {
                     "username", username
             );
             String payload = objectMapper.writeValueAsString(event);
-            kafkaTemplate.send("product-import-request", taskId.toString(), payload);
+            kafkaTemplate.send(importRequestTopic, taskId.toString(), payload);
 
             ImportProducts202Response response = new ImportProducts202Response();
             response.setTaskId(taskId);
-            response.setStatus("PENDING");
+            response.setStatus(ImportStatus.PENDING.getValue());
             return response;
         } catch (IOException e) {
             throw new ResponseStatusException(
