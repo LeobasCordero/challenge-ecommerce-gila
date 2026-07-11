@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -68,9 +69,12 @@ public class ProductImportServiceImpl implements ProductImportService {
             status.setWarnings(new ArrayList<>());
             statuses.put(taskId, status);
 
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
             Map<String, String> event = Map.of(
                     "taskId", taskId.toString(),
-                    "filePath", filePath.toAbsolutePath().toString()
+                    "filePath", filePath.toAbsolutePath().toString(),
+                    "username", username
             );
             String payload = objectMapper.writeValueAsString(event);
             kafkaTemplate.send("product-import-request", taskId.toString(), payload);

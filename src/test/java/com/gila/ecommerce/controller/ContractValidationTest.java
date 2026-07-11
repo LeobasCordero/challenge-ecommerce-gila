@@ -14,6 +14,7 @@ import com.gila.ecommerce.dto.OrderDto;
 import com.gila.ecommerce.dto.ProductDto;
 import com.gila.ecommerce.security.CustomUserDetailsService;
 import com.gila.ecommerce.security.JwtTokenProvider;
+import com.gila.ecommerce.service.AuditLogService;
 import com.gila.ecommerce.service.CartService;
 import com.gila.ecommerce.service.CheckoutService;
 import com.gila.ecommerce.service.ProductImportService;
@@ -58,6 +59,9 @@ public class ContractValidationTest {
 
     @MockBean
     private AuthenticationManager authenticationManager;
+
+    @MockBean
+    private AuditLogService auditLogService;
 
     @MockBean
     private JwtTokenProvider jwtTokenProvider;
