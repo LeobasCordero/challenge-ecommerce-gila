@@ -3,6 +3,7 @@ package com.gila.ecommerce.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gila.ecommerce.dto.ImportProducts202Response;
 import com.gila.ecommerce.dto.ProductImportStatusDto;
+import com.gila.ecommerce.exception.ErrorMessages;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,7 +51,7 @@ public class ProductImportServiceImpl implements ProductImportService {
     @Override
     public ImportProducts202Response importProducts(MultipartFile file) {
         if (file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "File is empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessages.FILE_EMPTY);
         }
         UUID taskId = UUID.randomUUID();
         try {
@@ -85,7 +86,7 @@ public class ProductImportServiceImpl implements ProductImportService {
             return response;
         } catch (IOException e) {
             throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save file: " + e.getMessage()
+                    HttpStatus.INTERNAL_SERVER_ERROR, ErrorMessages.FILE_SAVE_FAILED + e.getMessage()
             );
         }
     }
@@ -99,7 +100,7 @@ public class ProductImportServiceImpl implements ProductImportService {
     public ProductImportStatusDto getImportStatus(UUID taskId) {
         ProductImportStatusDto status = statuses.get(taskId);
         if (status == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.TASK_NOT_FOUND);
         }
         return status;
     }

@@ -2,6 +2,7 @@ package com.gila.ecommerce.service;
 
 import com.gila.ecommerce.aspect.Auditable;
 import com.gila.ecommerce.dto.ProductDto;
+import com.gila.ecommerce.exception.ErrorMessages;
 import com.gila.ecommerce.model.Product;
 import com.gila.ecommerce.repository.ProductRepository;
 import com.gila.ecommerce.util.AuditAction;
@@ -40,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
     @Auditable(action = AuditAction.PRODUCT_CREATE)
     public ProductDto createProduct(ProductDto productDto) {
         if (productRepository.findByName(productDto.getName()).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Product name already exists");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessages.PRODUCT_NAME_EXISTS);
         }
         Product product = ProductMapper.toEntity(productDto);
         if (product.getId() == null) {
@@ -59,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto getProductById(UUID id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.PRODUCT_NOT_FOUND));
         return ProductMapper.toDto(product);
     }
 
@@ -97,7 +98,7 @@ public class ProductServiceImpl implements ProductService {
     @Auditable(action = AuditAction.PRODUCT_UPDATE)
     public ProductDto updateProduct(UUID id, ProductDto productDto) {
         Product existing = productRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.PRODUCT_NOT_FOUND));
         existing.setName(productDto.getName());
         existing.setDescription(productDto.getDescription());
         if (productDto.getPrice() != null) {
@@ -118,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
     @Auditable(action = AuditAction.PRODUCT_DELETE)
     public void deleteProduct(UUID id) {
         if (!productRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ErrorMessages.PRODUCT_NOT_FOUND);
         }
         productRepository.deleteById(id);
     }

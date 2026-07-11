@@ -5,6 +5,7 @@ import com.gila.ecommerce.dto.CartDto;
 import com.gila.ecommerce.dto.CartItemDto;
 import com.gila.ecommerce.dto.OrderDto;
 import com.gila.ecommerce.dto.OrderItemDto;
+import com.gila.ecommerce.exception.ErrorMessages;
 import com.gila.ecommerce.model.Order;
 import com.gila.ecommerce.model.OrderItem;
 import com.gila.ecommerce.model.Product;
@@ -64,11 +65,11 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Auditable(action = AuditAction.CHECKOUT)
     public OrderDto checkout(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, ErrorMessages.USER_NOT_FOUND));
 
         CartDto cart = cartService.getCart(username);
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ErrorMessages.CART_EMPTY);
         }
 
         UUID orderId = UUID.randomUUID();
@@ -85,12 +86,12 @@ public class CheckoutServiceImpl implements CheckoutService {
             UUID productId = cartItem.getProduct().getId();
             Product product = productRepository.findWithLockById(productId)
                     .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.BAD_REQUEST, "Product not found: " + productId
+                            HttpStatus.BAD_REQUEST, ErrorMessages.PRODUCT_NOT_FOUND_PREFIX + productId
                     ));
 
             if (product.getStock() < cartItem.getQuantity()) {
                 throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Insufficient stock for product: " + product.getName()
+                        HttpStatus.BAD_REQUEST, ErrorMessages.INSUFFICIENT_STOCK_PREFIX + product.getName()
                 );
             }
 
@@ -98,7 +99,6 @@ public class CheckoutServiceImpl implements CheckoutService {
             productRepository.save(product);
 
             OrderItem orderItem = new OrderItem();
-            orderItem.setId(UUID.randomUUID());
             orderItem.setOrder(order);
             orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
