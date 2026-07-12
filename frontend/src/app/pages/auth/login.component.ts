@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from '../../core/api/api/auth.service';
-import { AuthStateService } from '../../core/state/auth-state.service';
+import { AuthStateService } from '../../services/auth-state.service';
 import { ERROR_MESSAGES } from '../../utils/constants';
 import { UserRole } from '../../utils/enums';
 

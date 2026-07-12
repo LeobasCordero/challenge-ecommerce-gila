@@ -4,12 +4,12 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
 import { PLATFORM_ID } from '@angular/core';
-import { CatalogComponent } from './catalog.component';
-import { ProductsService } from '../../core/api/api/products.service';
-import { CartService as CartApiService } from '../../core/api/api/cart.service';
-import { OrdersService } from '../../core/api/api/orders.service';
-import { CartStateService } from '../../core/state/cart-state.service';
-import { AuthStateService } from '../../core/state/auth-state.service';
+import { CatalogComponent } from '../../../app/pages/catalog/catalog.component';
+import { ProductsService } from '../../../app/core/api/api/products.service';
+import { CartService as CartApiService } from '../../../app/core/api/api/cart.service';
+import { OrdersService } from '../../../app/core/api/api/orders.service';
+import { CartStateService } from '../../../app/services/cart-state.service';
+import { AuthStateService } from '../../../app/services/auth-state.service';
 
 describe('CatalogComponent', () => {
   let mockProductsService: jasmine.SpyObj<ProductsService>;

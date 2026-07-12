@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { AppComponent } from './app.component';
-import { AuthStateService } from './core/state/auth-state.service';
-import { CartStateService } from './core/state/cart-state.service';
+import { AppComponent } from '../app/app.component';
+import { AuthStateService } from '../app/services/auth-state.service';
+import { CartStateService } from '../app/services/cart-state.service';
 
 describe('AppComponent', () => {
   let mockAuthState: Partial<AuthStateService>;

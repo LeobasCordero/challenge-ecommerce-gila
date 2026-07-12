@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
-import { CheckoutSuccessComponent } from './checkout-success.component';
+import { CheckoutSuccessComponent } from '../../../app/pages/checkout/checkout-success.component';
 
 describe('CheckoutSuccessComponent', () => {
   let mockRouter: jasmine.SpyObj<Router>;

@@ -6,8 +6,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 
-import { AuthStateService } from './core/state/auth-state.service';
-import { CartStateService } from './core/state/cart-state.service';
+import { AuthStateService } from './services/auth-state.service';
+import { CartStateService } from './services/cart-state.service';
 
 @Component({
   selector: 'app-root',

@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoginComponent } from './login.component';
-import { AuthService } from '../../core/api/api/auth.service';
-import { AuthStateService } from '../../core/state/auth-state.service';
+import { LoginComponent } from '../../../app/pages/auth/login.component';
+import { AuthService } from '../../../app/core/api/api/auth.service';
+import { AuthStateService } from '../../../app/services/auth-state.service';
 
 describe('LoginComponent', () => {
   let mockAuthService: jasmine.SpyObj<AuthService>;
