@@ -1,0 +1,68 @@
+.logo-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: $primary-color;
+}
+
+.header-logo {
+  cursor: pointer;
+}
+
+.nav-divider {
+  width: 1px;
+  height: 24px;
+  background-color: $border-color;
+  margin: 0 $spacing-sm;
+}
+
+.lang-selector-btn {
+  color: $text-muted !important;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.lang-text {
+  font-weight: 600;
+}
+
+.cart-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background-color: $primary-color;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+}
+
+.user-greeting {
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $text-main;
+}
+
+.login-btn-header {
+  border-color: $primary-color !important;
+  color: $primary-color !important;
+}
+
+.main-content {
+  min-height: calc(100vh - 73px);
+  background-color: $bg-color;
+}

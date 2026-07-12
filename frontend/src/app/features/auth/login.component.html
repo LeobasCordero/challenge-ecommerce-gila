@@ -1,0 +1,44 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>
+        <span i18n="@@loginTitle">Login to Gila Store</span>
+      </mat-card-title>
+      <mat-card-subtitle>
+        <span i18n="@@loginSubtitle">Enter your credentials below</span>
+      </mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label i18n="@@usernameLabel">Username</mat-label>
+          <input matInput formControlName="username" placeholder="e.g. admin or customer" required>
+          <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
+            <span i18n="@@usernameRequired">Username is required</span>
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label i18n="@@passwordLabel">Password</mat-label>
+          <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" required>
+          <button mat-icon-button matSuffix (click)="hidePassword.set(!hidePassword())" type="button" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword()">
+            <mat-icon>{{hidePassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+            <span i18n="@@passwordRequired">Password is required</span>
+          </mat-error>
+        </mat-form-field>
+
+        <div *ngIf="errorMessage()" class="error-message">
+          {{ errorMessage() }}
+        </div>
+
+        <button mat-raised-button color="primary" class="full-width login-button" type="submit" [disabled]="loginForm.invalid || isLoading()">
+          <mat-spinner diameter="20" *ngIf="isLoading()" class="spinner"></mat-spinner>
+          <span *ngIf="!isLoading()" i18n="@@loginBtn">Login</span>
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
