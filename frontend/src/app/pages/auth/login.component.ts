@@ -11,7 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from '../../core/api/api/auth.service';
 import { AuthStateService } from '../../services/auth-state.service';
-import { ERROR_MESSAGES } from '../../utils/constants';
+import { ERROR_MESSAGES, APP_ROUTES } from '../../utils/constants';
 import { UserRole } from '../../utils/enums';
 
 @Component({
@@ -35,6 +35,8 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly authState = inject(AuthStateService);
   private readonly router = inject(Router);
+
+  public readonly routes = APP_ROUTES;
 
   public readonly hidePassword = signal<boolean>(true);
   public readonly isLoading = signal<boolean>(false);
@@ -60,7 +62,7 @@ export class LoginComponent {
         this.isLoading.set(false);
         const role = username.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CUSTOMER;
         this.authState.login(response.token, username, role);
-        this.router.navigate(['/catalog']);
+        this.router.navigate([this.routes.CATALOG]);
       },
       error: () => {
         this.isLoading.set(false);

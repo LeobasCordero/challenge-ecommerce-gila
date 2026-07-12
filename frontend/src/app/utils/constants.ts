@@ -37,3 +37,10 @@ export const SNACKBAR_ACTIONS = {
   LOGIN: 'Login',
   VIEW_CART: 'View Cart'
 };
+
+export const APP_ROUTES = {
+  LOGIN: '/login',
+  CATALOG: '/catalog',
+  ADMIN: '/admin',
+  CHECKOUT_SUCCESS: '/checkout/success'
+};

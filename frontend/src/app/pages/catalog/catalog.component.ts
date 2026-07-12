@@ -19,7 +19,7 @@ import { ProductDto } from '../../core/api/model/productDto';
 import { CartItemDto } from '../../core/api/model/cartItemDto';
 import { CartStateService } from '../../services/cart-state.service';
 import { AuthStateService } from '../../services/auth-state.service';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, SNACKBAR_ACTIONS } from '../../utils/constants';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES, SNACKBAR_ACTIONS, APP_ROUTES } from '../../utils/constants';
 
 @Component({
   selector: 'app-catalog',
@@ -50,6 +50,8 @@ export class CatalogComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
   private readonly platformId = inject(PLATFORM_ID);
+
+  public readonly routes = APP_ROUTES;
 
   public searchQuery = '';
   public selectedCategory = '';
@@ -116,7 +118,7 @@ export class CatalogComponent implements OnInit {
   public addToCart(product: ProductDto): void {
     if (!this.authState.isAuthenticated()) {
       this.snackBar.open(ERROR_MESSAGES.LOGIN_REQUIRED, SNACKBAR_ACTIONS.LOGIN, { duration: 3000 })
-        .onAction().subscribe(() => this.router.navigate(['/login']));
+        .onAction().subscribe(() => this.router.navigate([this.routes.LOGIN]));
       return;
     }
 
@@ -189,7 +191,7 @@ export class CatalogComponent implements OnInit {
         this.cartState.clearCart();
         this.isCheckingOut.set(false);
         this.isCartOpen.set(false);
-        this.router.navigate(['/checkout/success'], { state: { order } });
+        this.router.navigate([this.routes.CHECKOUT_SUCCESS], { state: { order } });
       },
       error: (err) => {
         this.isCheckingOut.set(false);
@@ -201,5 +203,9 @@ export class CatalogComponent implements OnInit {
 
   public closeCart(): void {
     this.isCartOpen.set(false);
+  }
+
+  public isLowStock(product: ProductDto): boolean {
+    return (product.stock ?? 0) <= 5;
   }
 }

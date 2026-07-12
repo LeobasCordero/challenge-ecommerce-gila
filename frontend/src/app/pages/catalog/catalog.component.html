@@ -45,7 +45,7 @@
         <mat-card-content class="product-card-content">
           <p class="card-description">{{ product.description }}</p>
           <div class="product-specs">
-            <span class="stock-info" [class.low-stock]="(product.stock ?? 0) <= 5">
+            <span class="stock-info" [class.low-stock]="isLowStock(product)">
               <span i18n="@@stockLabel">Stock:</span> {{ product.stock }}
             </span>
           </div>
