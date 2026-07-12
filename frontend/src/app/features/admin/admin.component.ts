@@ -19,6 +19,7 @@ import { OrdersService } from '../../core/api/api/orders.service';
 import { ProductDto } from '../../core/api/model/productDto';
 import { ProductImportStatusDto } from '../../core/api/model/productImportStatusDto';
 import { AuthStateService } from '../../core/state/auth-state.service';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES, MODAL_CONFIRMATIONS } from '../../utils/constants';
 
 @Component({
   selector: 'app-admin',
@@ -81,8 +82,7 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   public loadProducts(): void {
     this.productsService.getProducts().subscribe({
-      next: (data) => this.products.set(data),
-      error: (err) => console.error('Error fetching admin products:', err)
+      next: (data) => this.products.set(data)
     });
   }
 
@@ -103,25 +103,23 @@ export class AdminComponent implements OnInit, OnDestroy {
     if (this.isEditing() && this.editingId()) {
       this.productsService.updateProduct(this.editingId()!, productDto).subscribe({
         next: () => {
-          this.snackBar.open('Product updated successfully!', 'Close', { duration: 3000 });
+          this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_UPDATED, 'Close', { duration: 3000 });
           this.cancelEdit();
           this.loadProducts();
         },
-        error: (err) => {
-          this.snackBar.open('Error updating product. Check log details.', 'Close', { duration: 3000 });
-          console.error(err);
+        error: () => {
+          this.snackBar.open(ERROR_MESSAGES.UPDATE_PRODUCT_FAILED, 'Close', { duration: 3000 });
         }
       });
     } else {
       this.productsService.createProduct(productDto).subscribe({
         next: () => {
-          this.snackBar.open('Product created successfully!', 'Close', { duration: 3000 });
+          this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_CREATED, 'Close', { duration: 3000 });
           this.productForm.reset({ price: 0, stock: 0 });
           this.loadProducts();
         },
-        error: (err) => {
-          this.snackBar.open('Error creating product. Name must be unique.', 'Close', { duration: 3000 });
-          console.error(err);
+        error: () => {
+          this.snackBar.open(ERROR_MESSAGES.CREATE_PRODUCT_FAILED, 'Close', { duration: 3000 });
         }
       });
     }
@@ -146,15 +144,14 @@ export class AdminComponent implements OnInit, OnDestroy {
   }
 
   public deleteProduct(product: ProductDto): void {
-    if (confirm(`Are you sure you want to delete ${product.name}?`)) {
+    if (confirm(MODAL_CONFIRMATIONS.DELETE_PRODUCT(product.name || ''))) {
       this.productsService.deleteProduct(product.id!).subscribe({
         next: () => {
-          this.snackBar.open('Product deleted successfully!', 'Close', { duration: 3000 });
+          this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_DELETED, 'Close', { duration: 3000 });
           this.loadProducts();
         },
-        error: (err) => {
-          this.snackBar.open('Error deleting product.', 'Close', { duration: 3000 });
-          console.error(err);
+        error: () => {
+          this.snackBar.open(ERROR_MESSAGES.DELETE_PRODUCT_FAILED, 'Close', { duration: 3000 });
         }
       });
     }
@@ -179,17 +176,16 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.productsService.importProducts(this.selectedFile()!).subscribe({
       next: (response) => {
         if (response.taskId) {
-          this.snackBar.open('CSV file uploaded. Processing import...', 'Close', { duration: 3000 });
+          this.snackBar.open(SUCCESS_MESSAGES.CSV_UPLOADED, 'Close', { duration: 3000 });
           this.startPolling(response.taskId);
         } else {
           this.isUploading.set(false);
           this.snackBar.open('Upload failed. No taskId returned.', 'Close', { duration: 3000 });
         }
       },
-      error: (err) => {
+      error: () => {
         this.isUploading.set(false);
-        this.snackBar.open('Error uploading file. Check format and rules.', 'Close', { duration: 3000 });
-        console.error(err);
+        this.snackBar.open(ERROR_MESSAGES.UPLOAD_CSV_FAILED, 'Close', { duration: 3000 });
       }
     });
   }
@@ -212,19 +208,18 @@ export class AdminComponent implements OnInit, OnDestroy {
         if (status.status === 'COMPLETED') {
           this.isUploading.set(false);
           this.selectedFile.set(null);
-          this.snackBar.open('Bulk import successfully finished!', 'Refresh', { duration: 5000 })
+          this.snackBar.open(SUCCESS_MESSAGES.IMPORT_COMPLETED, 'Refresh', { duration: 5000 })
             .onAction().subscribe(() => this.loadProducts());
           this.stopPolling();
         } else if (status.status === 'FAILED') {
           this.isUploading.set(false);
-          this.snackBar.open('Import task failed.', 'Close', { duration: 5000 });
+          this.snackBar.open(ERROR_MESSAGES.IMPORT_FAILED, 'Close', { duration: 5000 });
           this.stopPolling();
         }
       },
-      error: (err) => {
+      error: () => {
         this.isUploading.set(false);
         this.stopPolling();
-        console.error('Import polling error:', err);
       }
     });
   }
@@ -240,7 +235,7 @@ export class AdminComponent implements OnInit, OnDestroy {
    * Confirm and trigger the UAT reset: delete all orders and restore product stock defaults.
    */
   public clearOrders(): void {
-    const confirmed = confirm('This will delete ALL orders and restore all product stock. Continue?');
+    const confirmed = confirm(MODAL_CONFIRMATIONS.SYSTEM_RESET);
     if (!confirmed) {
       return;
     }
@@ -248,13 +243,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.ordersService.clearOrders().subscribe({
       next: () => {
         this.isResetting.set(false);
-        this.snackBar.open('System reset complete. All orders cleared and stock restored.', 'Close', { duration: 5000 });
+        this.snackBar.open(SUCCESS_MESSAGES.SYSTEM_RESET_COMPLETE, 'Close', { duration: 5000 });
         this.loadProducts();
       },
-      error: (err) => {
+      error: () => {
         this.isResetting.set(false);
-        this.snackBar.open('Reset failed. Check server logs.', 'Close', { duration: 4000 });
-        console.error('Reset error:', err);
+        this.snackBar.open(ERROR_MESSAGES.RESET_FAILED, 'Close', { duration: 4000 });
       }
     });
   }

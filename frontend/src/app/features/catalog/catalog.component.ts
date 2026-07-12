@@ -19,6 +19,7 @@ import { ProductDto } from '../../core/api/model/productDto';
 import { CartItemDto } from '../../core/api/model/cartItemDto';
 import { CartStateService } from '../../core/state/cart-state.service';
 import { AuthStateService } from '../../core/state/auth-state.service';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../utils/constants';
 
 @Component({
   selector: 'app-catalog',
@@ -84,10 +85,9 @@ export class CatalogComponent implements OnInit {
         this.products.set(data);
         this.isLoading.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.isLoading.set(false);
-        this.snackBar.open('Error loading products. Please try again.', 'Close', { duration: 3000 });
-        console.error('Error fetching products:', err);
+        this.snackBar.open(ERROR_MESSAGES.FETCH_PRODUCTS_FAILED, 'Close', { duration: 3000 });
       }
     });
   }
@@ -115,7 +115,7 @@ export class CatalogComponent implements OnInit {
   /** Add item to cart via Redis-backed backend API. */
   public addToCart(product: ProductDto): void {
     if (!this.authState.isAuthenticated()) {
-      this.snackBar.open('Please login to add items to your cart.', 'Login', { duration: 3000 })
+      this.snackBar.open(ERROR_MESSAGES.LOGIN_REQUIRED, 'Login', { duration: 3000 })
         .onAction().subscribe(() => this.router.navigate(['/login']));
       return;
     }
@@ -126,7 +126,7 @@ export class CatalogComponent implements OnInit {
 
     if (!product.id) {
       this.isAddingToCart.set(false);
-      this.snackBar.open('Cannot add item: product ID is missing.', 'Close', { duration: 3000 });
+      this.snackBar.open(ERROR_MESSAGES.MISSING_PRODUCT_ID, 'Close', { duration: 3000 });
       return;
     }
 
@@ -134,12 +134,12 @@ export class CatalogComponent implements OnInit {
       next: (cart) => {
         this.cartState.setCart(cart);
         this.isAddingToCart.set(false);
-        this.snackBar.open(`${product.name} added to cart!`, 'View Cart', { duration: 2500 })
+        this.snackBar.open(SUCCESS_MESSAGES.ADD_TO_CART(product.name || ''), 'View Cart', { duration: 2500 })
           .onAction().subscribe(() => this.isCartOpen.set(true));
       },
       error: (err) => {
         this.isAddingToCart.set(false);
-        const msg = err?.error?.detail ?? 'Could not add item. Please try again.';
+        const msg = err?.error?.detail ?? ERROR_MESSAGES.UPDATE_CART_FAILED;
         this.snackBar.open(msg, 'Close', { duration: 3000 });
       }
     });
@@ -158,7 +158,7 @@ export class CatalogComponent implements OnInit {
       },
       error: (err) => {
         this.isUpdatingCart.set(false);
-        const msg = err?.error?.detail ?? 'Could not update cart.';
+        const msg = err?.error?.detail ?? ERROR_MESSAGES.UPDATE_CART_FAILED;
         this.snackBar.open(msg, 'Close', { duration: 3000 });
       }
     });
@@ -176,7 +176,7 @@ export class CatalogComponent implements OnInit {
       },
       error: () => {
         this.isUpdatingCart.set(false);
-        this.snackBar.open('Could not remove item.', 'Close', { duration: 3000 });
+        this.snackBar.open(ERROR_MESSAGES.REMOVE_CART_ITEM_FAILED, 'Close', { duration: 3000 });
       }
     });
   }
@@ -193,7 +193,7 @@ export class CatalogComponent implements OnInit {
       },
       error: (err) => {
         this.isCheckingOut.set(false);
-        const msg = err?.error?.detail ?? err?.error?.message ?? 'Checkout failed. Please try again.';
+        const msg = err?.error?.detail ?? err?.error?.message ?? ERROR_MESSAGES.CHECKOUT_FAILED;
         this.snackBar.open(msg, 'Close', { duration: 5000 });
       }
     });

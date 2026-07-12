@@ -11,6 +11,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from '../../core/api/api/auth.service';
 import { AuthStateService } from '../../core/state/auth-state.service';
+import { ERROR_MESSAGES } from '../../utils/constants';
 
 @Component({
   selector: 'app-login',
@@ -60,10 +61,9 @@ export class LoginComponent {
         this.authState.login(response.token, username, role);
         this.router.navigate(['/catalog']);
       },
-      error: (err) => {
+      error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Invalid username or password. Please try again.');
-        console.error('Login error:', err);
+        this.errorMessage.set(ERROR_MESSAGES.LOGIN_FAILED);
       }
     });
   }
