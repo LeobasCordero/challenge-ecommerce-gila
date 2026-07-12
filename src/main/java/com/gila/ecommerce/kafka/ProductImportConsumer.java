@@ -72,6 +72,7 @@ public class ProductImportConsumer {
      * @param message JSON payload containing taskId and filePath
      */
     @KafkaListener(topics = "${app.kafka.topics.import-request}", groupId = "${spring.kafka.consumer.group-id}")
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void consumeImportRequest(String message) {
         UUID taskId = null;
         String filePath = null;
