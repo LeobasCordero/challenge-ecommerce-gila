@@ -189,6 +189,7 @@
       "providerState": "cart item can be updated",
       "request": {
         "body": {
+          "productId": "550e8400-e29b-41d4-a716-446655440000",
           "quantity": 3
         },
         "headers": {
@@ -196,6 +197,9 @@
           "Content-Type": "application/json"
         },
         "matchingRules": {
+          "$.body.productId": {
+            "match": "type"
+          },
           "$.body.quantity": {
             "match": "type"
           },
@@ -204,8 +208,8 @@
             "regex": "Bearer .+"
           }
         },
-        "method": "PUT",
-        "path": "/api/v1/cart/items/550e8400-e29b-41d4-a716-446655440000"
+        "method": "POST",
+        "path": "/api/v1/cart"
       },
       "response": {
         "body": {

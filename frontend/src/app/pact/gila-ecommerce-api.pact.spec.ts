@@ -94,19 +94,19 @@ pactWith({ ...PACT_OPTIONS, port: 1235 }, (provider) => {
 
 /** Interaction 3: Update cart item quantity */
 pactWith({ ...PACT_OPTIONS, port: 1236 }, (provider) => {
-  describe(`PUT /api/v1/cart/items/${PRODUCT_ID} — a request to update cart item quantity`, () => {
+  describe('POST /api/v1/cart — a request to update cart item quantity', () => {
     beforeEach(() =>
       provider.addInteraction({
         state: 'cart item can be updated',
         uponReceiving: 'a request to update cart item quantity',
         withRequest: {
-          method: 'PUT',
-          path: `/api/v1/cart/items/${PRODUCT_ID}`,
+          method: 'POST',
+          path: '/api/v1/cart',
           headers: {
             Authorization: term({ generate: BEARER_TOKEN, matcher: 'Bearer .+' }),
             'Content-Type': 'application/json',
           },
-          body: { quantity: like(3) },
+          body: { productId: like(PRODUCT_ID), quantity: like(3) },
         },
         willRespondWith: {
           status: 200,
@@ -122,9 +122,9 @@ pactWith({ ...PACT_OPTIONS, port: 1236 }, (provider) => {
     );
 
     it('updates the cart item and returns updated cart', async () => {
-      const response = await axios.put(
-        `${provider.mockService.baseUrl}/api/v1/cart/items/${PRODUCT_ID}`,
-        { quantity: 3 },
+      const response = await axios.post(
+        `${provider.mockService.baseUrl}/api/v1/cart`,
+        { productId: PRODUCT_ID, quantity: 3 },
         { headers: { Authorization: BEARER_TOKEN, 'Content-Type': 'application/json' } }
       );
       expect(response.status).toBe(200);
