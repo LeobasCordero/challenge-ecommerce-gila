@@ -1,0 +1,286 @@
+{
+  "consumer": {
+    "name": "GilaAngularConsumer"
+  },
+  "interactions": [
+    {
+      "description": "a request to complete checkout",
+      "providerState": "cart is ready for checkout",
+      "request": {
+        "headers": {
+          "Authorization": "Bearer test-token"
+        },
+        "matchingRules": {
+          "$.header.Authorization": {
+            "match": "regex",
+            "regex": "Bearer .+"
+          }
+        },
+        "method": "POST",
+        "path": "/api/v1/orders/checkout"
+      },
+      "response": {
+        "body": {
+          "id": "550e8400-e29b-41d4-a716-446655440099",
+          "items": [
+            {
+              "priceAtPurchase": 9.99,
+              "product": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "name": "Test Product",
+                "price": 9.99
+              },
+              "quantity": 2
+            }
+          ],
+          "status": "PAID",
+          "totalPrice": 19.98
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.id": {
+            "match": "type"
+          },
+          "$.body.items": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.items[*].priceAtPurchase": {
+            "match": "type"
+          },
+          "$.body.items[*].product": {
+            "match": "type"
+          },
+          "$.body.items[*].product.id": {
+            "match": "type"
+          },
+          "$.body.items[*].product.name": {
+            "match": "type"
+          },
+          "$.body.items[*].product.price": {
+            "match": "type"
+          },
+          "$.body.items[*].quantity": {
+            "match": "type"
+          },
+          "$.body.status": {
+            "match": "type"
+          },
+          "$.body.totalPrice": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to get the authenticated user cart",
+      "providerState": "cart has items",
+      "request": {
+        "headers": {
+          "Authorization": "Bearer test-token"
+        },
+        "matchingRules": {
+          "$.header.Authorization": {
+            "match": "regex",
+            "regex": "Bearer .+"
+          }
+        },
+        "method": "GET",
+        "path": "/api/v1/cart"
+      },
+      "response": {
+        "body": {
+          "items": [
+            {
+              "product": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "name": "Test Product",
+                "price": 9.99
+              },
+              "quantity": 2
+            }
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.items": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.items[*].product": {
+            "match": "type"
+          },
+          "$.body.items[*].product.id": {
+            "match": "type"
+          },
+          "$.body.items[*].product.name": {
+            "match": "type"
+          },
+          "$.body.items[*].product.price": {
+            "match": "type"
+          },
+          "$.body.items[*].quantity": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to list all products",
+      "providerState": "products exist",
+      "request": {
+        "headers": {
+          "Authorization": "Bearer test-token"
+        },
+        "matchingRules": {
+          "$.header.Authorization": {
+            "match": "regex",
+            "regex": "Bearer .+"
+          }
+        },
+        "method": "GET",
+        "path": "/api/v1/products"
+      },
+      "response": {
+        "body": [
+          {
+            "category": "Electronics",
+            "id": "550e8400-e29b-41d4-a716-446655440000",
+            "name": "Test Product",
+            "price": 9.99,
+            "stock": 100
+          }
+        ],
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body[*].category": {
+            "match": "type"
+          },
+          "$.body[*].id": {
+            "match": "type"
+          },
+          "$.body[*].name": {
+            "match": "type"
+          },
+          "$.body[*].price": {
+            "match": "type"
+          },
+          "$.body[*].stock": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to update cart item quantity",
+      "providerState": "cart item can be updated",
+      "request": {
+        "body": {
+          "quantity": 3
+        },
+        "headers": {
+          "Authorization": "Bearer test-token",
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.quantity": {
+            "match": "type"
+          },
+          "$.header.Authorization": {
+            "match": "regex",
+            "regex": "Bearer .+"
+          }
+        },
+        "method": "PUT",
+        "path": "/api/v1/cart/items/550e8400-e29b-41d4-a716-446655440000"
+      },
+      "response": {
+        "body": {
+          "items": [
+            {
+              "product": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "name": "Test Product",
+                "price": 9.99
+              },
+              "quantity": 3
+            }
+          ]
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.items": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.items[*].product": {
+            "match": "type"
+          },
+          "$.body.items[*].product.id": {
+            "match": "type"
+          },
+          "$.body.items[*].product.name": {
+            "match": "type"
+          },
+          "$.body.items[*].product.price": {
+            "match": "type"
+          },
+          "$.body.items[*].quantity": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "an admin request to clear all orders and restore stock",
+      "providerState": "orders exist",
+      "request": {
+        "headers": {
+          "Authorization": "Bearer test-token"
+        },
+        "matchingRules": {
+          "$.header.Authorization": {
+            "match": "regex",
+            "regex": "Bearer .+"
+          }
+        },
+        "method": "DELETE",
+        "path": "/api/v1/orders/clear"
+      },
+      "response": {
+        "status": 204
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "13.2.0"
+    },
+    "pactRust": {
+      "ffi": "0.4.22",
+      "models": "1.2.3"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "GilaECommerceAPI"
+  }
+}
