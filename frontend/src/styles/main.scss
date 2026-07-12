@@ -10,7 +10,12 @@
 @import 'components/buttons';
 @import 'components/cards';
 @import 'components/forms';
+@import 'components/admin';
+@import 'components/login';
+@import 'components/catalog';
+@import 'components/checkout-success';
 
 // 4. Layout
 @import 'layout/grid';
 @import 'layout/header';
+@import 'layout/app';

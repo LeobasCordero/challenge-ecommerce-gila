@@ -1,0 +1,140 @@
+<div class="catalog-pagecontainer container">
+  <!-- Search & Filters section -->
+  <section class="filters-section">
+    <div class="search-box">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label i18n="@@searchPlaceholder">Search products...</mat-label>
+        <input matInput [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Type product name or description...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="category-box">
+      <mat-form-field appearance="outline" class="category-field">
+        <mat-label i18n="@@categoryLabel">Category</mat-label>
+        <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onFilterChange()">
+          <mat-option value="" i18n="@@allCategories">All Categories</mat-option>
+          <mat-option *ngFor="let cat of categories()" [value]="cat">{{ cat }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </section>
+
+  <!-- Products catalog section -->
+  <section class="catalog-products-section">
+    <div class="spinner-container" *ngIf="isLoading()">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading() && products().length === 0">
+      <mat-icon class="empty-icon">search_off</mat-icon>
+      <p i18n="@@noProductsFound">No products found matching your criteria.</p>
+    </div>
+
+    <div class="grid grid-cols-1 grid-cols-2 grid-cols-3 grid-cols-4" *ngIf="!isLoading()">
+      <mat-card class="card product-card" *ngFor="let product of products()">
+        <div class="product-img-placeholder">
+          <mat-icon class="product-icon">image</mat-icon>
+        </div>
+        
+        <mat-card-header class="product-card-header">
+          <mat-card-title class="card-title">{{ product.name }}</mat-card-title>
+          <mat-card-subtitle class="product-category">{{ product.category }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="product-card-content">
+          <p class="card-description">{{ product.description }}</p>
+          <div class="product-specs">
+            <span class="stock-info" [class.low-stock]="(product.stock ?? 0) <= 5">
+              <span i18n="@@stockLabel">Stock:</span> {{ product.stock }}
+            </span>
+          </div>
+        </mat-card-content>
+
+        <mat-card-footer class="product-card-footer">
+          <span class="product-price">${{ (product.price ?? 0).toFixed(2) }}</span>
+          <button mat-raised-button color="primary" id="add-to-cart-{{ product.id }}"
+            class="add-to-cart-btn" (click)="addToCart(product)"
+            [disabled]="(product.stock ?? 0) === 0 || isAddingToCart()">
+            <mat-icon>add_shopping_cart</mat-icon>
+            <span i18n="@@addToCartBtn">Add</span>
+          </button>
+        </mat-card-footer>
+      </mat-card>
+    </div>
+  </section>
+
+  <!-- Cart Sidebar Drawer -->
+  <button class="cart-sidebar-overlay" [class.open]="isCartOpen()" (click)="closeCart()"
+    aria-label="Close cart overlay" tabindex="-1"></button>
+  <aside class="cart-sidebar" [class.open]="isCartOpen()" aria-label="Shopping cart">
+    <div class="cart-sidebar-header">
+      <h3 i18n="@@cartTitle">Shopping Cart</h3>
+      <button mat-icon-button id="close-cart-btn" (click)="closeCart()" aria-label="Close cart">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <mat-divider></mat-divider>
+
+    <div class="cart-sidebar-content">
+      <!-- Empty state -->
+      <div class="cart-empty" *ngIf="cartState.itemCount() === 0">
+        <mat-icon class="cart-empty-icon">shopping_cart_off</mat-icon>
+        <p i18n="@@cartEmptyMessage">Your cart is empty.</p>
+      </div>
+
+      <!-- Cart items list -->
+      <div class="cart-items" *ngIf="cartState.itemCount() > 0">
+        <div class="cart-item" *ngFor="let item of cartState.cart()?.items ?? []">
+          <div class="cart-item-info">
+            <span class="cart-item-name">{{ item.product?.name }}</span>
+            <span class="cart-item-price">${{ ((item.product?.price ?? 0) * (item.quantity ?? 0)).toFixed(2) }}</span>
+          </div>
+          <div class="cart-item-controls">
+            <button mat-icon-button class="qty-btn" id="decrease-qty-{{ item.product?.id }}"
+              (click)="changeQuantity(item, -1)"
+              [disabled]="isUpdatingCart()"
+              aria-label="Decrease quantity">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <span class="cart-item-qty">{{ item.quantity }}</span>
+            <button mat-icon-button class="qty-btn" id="increase-qty-{{ item.product?.id }}"
+              (click)="changeQuantity(item, 1)"
+              [disabled]="isUpdatingCart() || (item.quantity ?? 0) >= (item.product?.stock ?? 0)"
+              aria-label="Increase quantity">
+              <mat-icon>add</mat-icon>
+            </button>
+            <button mat-icon-button class="remove-btn" id="remove-item-{{ item.product?.id }}"
+              (click)="removeFromCart(item)"
+              [disabled]="isUpdatingCart()"
+              aria-label="Remove item">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Cart totals -->
+        <div class="cart-totals">
+          <span class="cart-total-label" i18n="@@cartTotalLabel">Total</span>
+          <span class="cart-total-amount">${{ cartState.totalPrice().toFixed(2) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cart footer with Checkout button -->
+    <div class="cart-sidebar-footer">
+      <button mat-raised-button color="primary" id="checkout-btn"
+        class="checkout-btn" (click)="checkout()"
+        [disabled]="cartState.itemCount() === 0 || isCheckingOut() || !authState.isAuthenticated()">
+        <mat-spinner *ngIf="isCheckingOut()" diameter="18" class="checkout-spinner"></mat-spinner>
+        <mat-icon *ngIf="!isCheckingOut()">shopping_bag</mat-icon>
+        <span i18n="@@buyNowBtn">Buy Now</span>
+      </button>
+      <p *ngIf="!authState.isAuthenticated()" class="login-to-checkout" i18n="@@loginToCheckout">
+        <a routerLink="/login">Login</a> to checkout
+      </p>
+    </div>
+  </aside>
+</div>

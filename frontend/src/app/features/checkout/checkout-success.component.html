@@ -1,0 +1,63 @@
+<div class="success-page container">
+  <div class="success-card">
+    <!-- Success header -->
+    <div class="success-header">
+      <div class="success-icon-wrapper">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+      </div>
+      <h1 i18n="@@checkoutSuccessTitle">Order Confirmed!</h1>
+      <p class="success-subtitle" i18n="@@checkoutSuccessSubtitle">
+        Thank you for your purchase. Your payment was processed successfully.
+      </p>
+    </div>
+
+    <!-- Order details -->
+    <div class="order-details" *ngIf="order">
+      <div class="order-id-row">
+        <span class="order-label" i18n="@@orderIdLabel">Order ID:</span>
+        <span class="order-id" id="order-id">{{ order.id }}</span>
+      </div>
+      <div class="order-status-row">
+        <span class="order-label" i18n="@@orderStatusLabel">Status:</span>
+        <span class="order-status-badge">{{ order.status }}</span>
+      </div>
+
+      <mat-divider class="divider"></mat-divider>
+
+      <!-- Items list -->
+      <h3 class="items-title" i18n="@@orderItemsTitle">Items Purchased</h3>
+      <div class="order-items">
+        <div class="order-item" *ngFor="let item of order.items ?? []" id="order-item-{{ item.product?.id }}">
+          <div class="order-item-info">
+            <span class="order-item-name">{{ item.product?.name }}</span>
+            <span class="order-item-qty" i18n="@@orderItemQtyLabel">× {{ item.quantity }}</span>
+          </div>
+          <span class="order-item-price">${{ ((item.priceAtPurchase ?? 0) * (item.quantity ?? 0)).toFixed(2) }}</span>
+        </div>
+      </div>
+
+      <mat-divider class="divider"></mat-divider>
+
+      <!-- Total -->
+      <div class="order-total-row">
+        <span class="order-total-label" i18n="@@orderTotalLabel">Total Paid</span>
+        <span class="order-total-amount" id="order-total">${{ (order.totalPrice ?? 0).toFixed(2) }}</span>
+      </div>
+    </div>
+
+    <!-- No order data fallback -->
+    <div class="no-order" *ngIf="!order">
+      <mat-icon class="no-order-icon">receipt_long</mat-icon>
+      <p i18n="@@noOrderData">No order details available.</p>
+    </div>
+
+    <!-- Navigation actions -->
+    <div class="success-actions">
+      <button mat-raised-button color="primary" id="back-to-catalog-btn"
+        class="back-btn" routerLink="/catalog">
+        <mat-icon>storefront</mat-icon>
+        <span i18n="@@continueShopping">Continue Shopping</span>
+      </button>
+    </div>
+  </div>
+</div>
