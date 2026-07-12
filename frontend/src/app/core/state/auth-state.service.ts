@@ -1,4 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
+import { UserRole } from '../../utils/enums';
 
 @Injectable({
   providedIn: 'root'
@@ -16,8 +17,8 @@ export class AuthStateService {
 
   // Computed state
   public readonly isAuthenticated = computed(() => !!this._token());
-  public readonly isAdmin = computed(() => this._role() === 'ADMIN');
-  public readonly isCustomer = computed(() => this._role() === 'CUSTOMER');
+  public readonly isAdmin = computed(() => this._role() === UserRole.ADMIN);
+  public readonly isCustomer = computed(() => this._role() === UserRole.CUSTOMER);
 
   public login(token: string, username: string, role: string): void {
     this.setLocalStorageItem('jwt_token', token);

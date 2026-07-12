@@ -12,6 +12,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../core/api/api/auth.service';
 import { AuthStateService } from '../../core/state/auth-state.service';
 import { ERROR_MESSAGES } from '../../utils/constants';
+import { UserRole } from '../../utils/enums';
 
 @Component({
   selector: 'app-login',
@@ -57,7 +58,7 @@ export class LoginComponent {
     this.authService.login({ username, password }).subscribe({
       next: (response) => {
         this.isLoading.set(false);
-        const role = username.toLowerCase() === 'admin' ? 'ADMIN' : 'CUSTOMER';
+        const role = username.toLowerCase() === 'admin' ? UserRole.ADMIN : UserRole.CUSTOMER;
         this.authState.login(response.token, username, role);
         this.router.navigate(['/catalog']);
       },

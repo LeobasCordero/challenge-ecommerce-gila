@@ -32,3 +32,6 @@ replay_pid*
 # Temporary import files
 temp-imports/
 
+# Prevent shell scripts from being tracked
+*.sh
+
