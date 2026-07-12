@@ -6,7 +6,8 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and build package
+# Copy config rulesets and source code
+COPY config ./config
 COPY src ./src
 RUN mvn package -DskipTests -B
 
@@ -20,5 +21,5 @@ COPY --from=build /app/target/*.jar app.jar
 # Expose port
 EXPOSE 8080
 
-# Run the jar file
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the jar file with support for JVM startup optimizations
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
