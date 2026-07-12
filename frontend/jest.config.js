@@ -2,7 +2,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['**/pact/**/*.pact.spec.ts'],
+  testMatch: ['**/pact/**/*.pact.ts'],
   globals: {
     'ts-jest': {
       tsconfig: 'tsconfig.jest.json',
