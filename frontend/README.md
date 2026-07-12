@@ -1,27 +1,73 @@
-# Frontend
+# Frontend Application (Angular Client)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.17.
+This frontend client is built on **Angular 17** utilizing Standalone components, Signals state management, and Sass 7-1 architectural patterns.
 
-## Development server
+---
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Directory Layout
 
-## Code scaffolding
+We strictly classify our files by architectural intent:
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+```
+src/
+├── app/
+│   ├── components/       # Presentation components (reusable widgets)
+│   ├── services/         # Hand-written application services (AuthStateService, CartStateService)
+│   ├── models/           # Custom local models/interfaces
+│   ├── pipes/            # Custom Angular pipes
+│   ├── directives/       # Reusable element directives
+│   ├── guards/           # Route guards (admin guard, auth guards)
+│   ├── interceptors/     # Http interceptors (authInterceptor)
+│   ├── pages/            # Page/Route components (login, catalog, admin, checkout-success)
+│   ├── utils/            # Shared constants, enums, and helpers
+│   └── core/api/         # Generated OpenAPI client services & models
+└── tests/                # Exclusive tests folder mirroring the app/ folder layout
+```
 
-## Build
+---
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Styles & Sass 7-1 Pattern
 
-## Running unit tests
+Styles are extracted globally and mapped into layout and component partials inside `src/styles/`:
+- **`src/styles/abstracts/`**: Contains global variables (`_variables.scss`) and typography guidelines.
+- **`src/styles/layout/`**: Centralizes application layout patterns like `_app.scss`.
+- **`src/styles/components/`**: Standardizes scoped style modules for components like `_admin.scss`, `_login.scss`, `_catalog.scss`, and `_checkout-success.scss`.
+- **`src/styles/main.scss`**: Root index importing all Sass modules.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+---
 
-## Running end-to-end tests
+## Command Reference
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+### Development Server
+Run the dev server on `http://localhost:4200/`:
+```bash
+npm start
+```
 
-## Further help
+### Production Build
+Builds the client with optimization budgets to `/dist/frontend/`:
+```bash
+npm run build
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+### Unit Tests (Karma / Jasmine)
+Executes all local unit spec files inside the centralized `src/tests/` folder:
+```bash
+npm run test
+```
+
+### Contract Tests (Jest / Pact)
+Executes consumer contract tests against mock providers:
+```bash
+npm run test:pact
+```
+
+### Code Quality Linters
+Runs ESLint typescript checking and Stylelint SCSS validation rules:
+```bash
+# TS Linter
+npm run lint
+
+# SCSS Linter
+npm run stylelint
+```
