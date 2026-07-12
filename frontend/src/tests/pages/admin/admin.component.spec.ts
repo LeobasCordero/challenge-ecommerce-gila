@@ -3,10 +3,10 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule, FormBuilder } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of } from 'rxjs';
-import { AdminComponent } from './admin.component';
-import { AuthStateService } from '../../core/state/auth-state.service';
-import { ProductsService } from '../../core/api/api/products.service';
-import { OrdersService } from '../../core/api/api/orders.service';
+import { AdminComponent } from '../../../app/pages/admin/admin.component';
+import { AuthStateService } from '../../../app/services/auth-state.service';
+import { ProductsService } from '../../../app/core/api/api/products.service';
+import { OrdersService } from '../../../app/core/api/api/orders.service';
 
 describe('AdminComponent', () => {
   let mockAuthState: jasmine.SpyObj<AuthStateService>;

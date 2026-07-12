@@ -18,7 +18,7 @@ import { ProductsService } from '../../core/api/api/products.service';
 import { OrdersService } from '../../core/api/api/orders.service';
 import { ProductDto } from '../../core/api/model/productDto';
 import { ProductImportStatusDto } from '../../core/api/model/productImportStatusDto';
-import { AuthStateService } from '../../core/state/auth-state.service';
+import { AuthStateService } from '../../services/auth-state.service';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, MODAL_CONFIRMATIONS, SNACKBAR_ACTIONS } from '../../utils/constants';
 import { ImportStatus } from '../../utils/enums';
 

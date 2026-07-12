@@ -17,8 +17,8 @@ import { CartService as CartApiService } from '../../core/api/api/cart.service';
 import { OrdersService } from '../../core/api/api/orders.service';
 import { ProductDto } from '../../core/api/model/productDto';
 import { CartItemDto } from '../../core/api/model/cartItemDto';
-import { CartStateService } from '../../core/state/cart-state.service';
-import { AuthStateService } from '../../core/state/auth-state.service';
+import { CartStateService } from '../../services/cart-state.service';
+import { AuthStateService } from '../../services/auth-state.service';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, SNACKBAR_ACTIONS } from '../../utils/constants';
 
 @Component({

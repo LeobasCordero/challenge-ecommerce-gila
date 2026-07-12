@@ -1,6 +1,6 @@
 import { Injectable, signal, computed, inject, effect } from '@angular/core';
-import { CartDto } from '../api/model/cartDto';
-import { CartService as CartApiService } from '../api/api/cart.service';
+import { CartDto } from '../core/api/model/cartDto';
+import { CartService as CartApiService } from '../core/api/api/cart.service';
 import { AuthStateService } from './auth-state.service';
 
 @Injectable({

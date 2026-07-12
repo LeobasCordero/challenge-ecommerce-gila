@@ -8,19 +8,19 @@ export const routes: Routes = [
   },
   {
     path: 'login',
-    loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent)
+    loadComponent: () => import('./pages/auth/login.component').then(m => m.LoginComponent)
   },
   {
     path: 'catalog',
-    loadComponent: () => import('./features/catalog/catalog.component').then(m => m.CatalogComponent)
+    loadComponent: () => import('./pages/catalog/catalog.component').then(m => m.CatalogComponent)
   },
   {
     path: 'admin',
-    loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent)
+    loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent)
   },
   {
     path: 'checkout/success',
-    loadComponent: () => import('./features/checkout/checkout-success.component').then(m => m.CheckoutSuccessComponent)
+    loadComponent: () => import('./pages/checkout/checkout-success.component').then(m => m.CheckoutSuccessComponent)
   },
   {
     path: '**',
