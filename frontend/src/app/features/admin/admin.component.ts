@@ -15,6 +15,7 @@ import { Subscription, interval } from 'rxjs';
 import { switchMap, takeWhile } from 'rxjs/operators';
 
 import { ProductsService } from '../../core/api/api/products.service';
+import { OrdersService } from '../../core/api/api/orders.service';
 import { ProductDto } from '../../core/api/model/productDto';
 import { ProductImportStatusDto } from '../../core/api/model/productImportStatusDto';
 import { AuthStateService } from '../../core/state/auth-state.service';
@@ -202,6 +203,38 @@ import { AuthStateService } from '../../core/state/auth-state.service';
               </mat-card>
             </div>
           </mat-tab>
+
+          <!-- System Reset Tab -->
+          <mat-tab label="System Reset" i18n-label="@@tabReset">
+            <div class="tab-content">
+              <mat-card class="reset-card">
+                <mat-card-header>
+                  <mat-icon class="reset-icon">warning_amber</mat-icon>
+                  <mat-card-title i18n="@@resetTitle">Reset System for UAT</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <p class="reset-description" i18n="@@resetDescription">
+                    This action permanently deletes all orders and restores every product's stock to its initial value.
+                    Use this only to reset the application state for evaluator testing.
+                  </p>
+                  <mat-divider class="reset-divider"></mat-divider>
+                  <div class="reset-actions">
+                    <mat-progress-bar *ngIf="isResetting()" mode="indeterminate" class="reset-progress"></mat-progress-bar>
+                    <button
+                      mat-raised-button
+                      id="btn-reset-orders"
+                      class="reset-btn"
+                      [disabled]="isResetting()"
+                      (click)="clearOrders()"
+                      i18n="@@resetBtn">
+                      <mat-icon>delete_sweep</mat-icon>
+                      Reset All Orders &amp; Restore Stock
+                    </button>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </mat-tab>
         </mat-tab-group>
       </div>
     </div>
@@ -366,11 +399,53 @@ import { AuthStateService } from '../../core/state/auth-state.service';
       font-size: 13px;
       color: #7f1d1d;
     }
+    .reset-card {
+      padding: 24px;
+      border-radius: 8px;
+      border: 1px solid #fca5a5;
+      background-color: #fff7f7;
+    }
+    .reset-icon {
+      color: #dc2626;
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      margin-right: 12px;
+    }
+    .reset-description {
+      color: #64748b;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .reset-divider {
+      margin-bottom: 24px;
+    }
+    .reset-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .reset-progress {
+      width: 100%;
+      max-width: 400px;
+    }
+    .reset-btn {
+      background-color: #dc2626 !important;
+      color: white !important;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .reset-btn[disabled] {
+      background-color: #fca5a5 !important;
+      color: #fff !important;
+    }
   `]
 })
 export class AdminComponent implements OnInit, OnDestroy {
   public readonly authState = inject(AuthStateService);
   private readonly productsService = inject(ProductsService);
+  private readonly ordersService = inject(OrdersService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -383,6 +458,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   // File upload fields
   public readonly selectedFile = signal<File | null>(null);
   public readonly isUploading = signal<boolean>(false);
+  public readonly isResetting = signal<boolean>(false);
   public readonly importStatus = signal<ProductImportStatusDto | null>(null);
 
   public productForm: FormGroup = this.fb.group({
@@ -560,5 +636,28 @@ export class AdminComponent implements OnInit, OnDestroy {
       this.pollSubscription.unsubscribe();
       this.pollSubscription = undefined;
     }
+  }
+
+  /**
+   * Confirm and trigger the UAT reset: delete all orders and restore product stock defaults.
+   */
+  public clearOrders(): void {
+    const confirmed = confirm('This will delete ALL orders and restore all product stock. Continue?');
+    if (!confirmed) {
+      return;
+    }
+    this.isResetting.set(true);
+    this.ordersService.clearOrders().subscribe({
+      next: () => {
+        this.isResetting.set(false);
+        this.snackBar.open('System reset complete. All orders cleared and stock restored.', 'Close', { duration: 5000 });
+        this.loadProducts();
+      },
+      error: (err) => {
+        this.isResetting.set(false);
+        this.snackBar.open('Reset failed. Check server logs.', 'Close', { duration: 4000 });
+        console.error('Reset error:', err);
+      }
+    });
   }
 }

@@ -2,6 +2,30 @@
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
   <file source-language="en" target-language="es" datatype="plaintext" original="ng2.template">
     <body>
+      <trans-unit id="tabReset" datatype="html">
+        <source>System Reset</source>
+        <target>Restablecimiento del Sistema</target>
+      </trans-unit>
+      <trans-unit id="resetTitle" datatype="html">
+        <source>Reset System for UAT</source>
+        <target>Restablecer Sistema para Pruebas UAT</target>
+      </trans-unit>
+      <trans-unit id="resetDescription" datatype="html">
+        <source>This action permanently deletes all orders and restores every product's stock to its initial value. Use this only to reset the application state for evaluator testing.</source>
+        <target>Esta acción elimina permanentemente todas las órdenes y restaura el inventario de cada producto a su valor inicial. Úsela solo para restablecer el estado de la aplicación durante las pruebas del evaluador.</target>
+      </trans-unit>
+      <trans-unit id="resetBtn" datatype="html">
+        <source>Reset All Orders &amp; Restore Stock</source>
+        <target>Eliminar Todas las Órdenes y Restaurar Inventario</target>
+      </trans-unit>
+      <trans-unit id="resetSuccessMsg" datatype="html">
+        <source>System reset complete. All orders cleared and stock restored.</source>
+        <target>Restablecimiento completo. Todas las órdenes eliminadas y el inventario restaurado.</target>
+      </trans-unit>
+      <trans-unit id="resetErrorMsg" datatype="html">
+        <source>Reset failed. Check server logs.</source>
+        <target>Error al restablecer. Revise los registros del servidor.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>
