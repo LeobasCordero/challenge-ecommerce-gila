@@ -43,6 +43,7 @@ public class AuditLogServiceImpl implements AuditLogService {
      * @param metadata map of arbitrary key-value details relating to operation context
      */
     @Override
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void log(
             String username,
             String action,

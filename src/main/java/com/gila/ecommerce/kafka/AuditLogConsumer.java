@@ -37,6 +37,7 @@ public class AuditLogConsumer {
      * @param message raw JSON payload from Kafka
      */
     @KafkaListener(topics = "${app.kafka.topics.audit-log}", groupId = "${spring.kafka.consumer.group-id}")
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void consumeAuditLog(String message) {
         try {
             Map<String, Object> payload = objectMapper.readValue(
