@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 
 import { AuthStateService } from './services/auth-state.service';
 import { CartStateService } from './services/cart-state.service';
+import { APP_ROUTES } from './utils/constants';
 
 @Component({
   selector: 'app-root',
@@ -57,6 +58,6 @@ export class AppComponent {
   public logout(): void {
     this.authState.logout();
     this.cartState.clearCart();
-    this.router.navigate(['/login']);
+    this.router.navigate([APP_ROUTES.LOGIN]);
   }
 }
