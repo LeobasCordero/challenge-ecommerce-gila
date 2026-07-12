@@ -19,7 +19,8 @@ import { OrdersService } from '../../core/api/api/orders.service';
 import { ProductDto } from '../../core/api/model/productDto';
 import { ProductImportStatusDto } from '../../core/api/model/productImportStatusDto';
 import { AuthStateService } from '../../core/state/auth-state.service';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, MODAL_CONFIRMATIONS } from '../../utils/constants';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES, MODAL_CONFIRMATIONS, SNACKBAR_ACTIONS } from '../../utils/constants';
+import { ImportStatus } from '../../utils/enums';
 
 @Component({
   selector: 'app-admin',
@@ -103,23 +104,23 @@ export class AdminComponent implements OnInit, OnDestroy {
     if (this.isEditing() && this.editingId()) {
       this.productsService.updateProduct(this.editingId()!, productDto).subscribe({
         next: () => {
-          this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_UPDATED, 'Close', { duration: 3000 });
+          this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_UPDATED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
           this.cancelEdit();
           this.loadProducts();
         },
         error: () => {
-          this.snackBar.open(ERROR_MESSAGES.UPDATE_PRODUCT_FAILED, 'Close', { duration: 3000 });
+          this.snackBar.open(ERROR_MESSAGES.UPDATE_PRODUCT_FAILED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
         }
       });
     } else {
       this.productsService.createProduct(productDto).subscribe({
         next: () => {
-          this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_CREATED, 'Close', { duration: 3000 });
+          this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_CREATED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
           this.productForm.reset({ price: 0, stock: 0 });
           this.loadProducts();
         },
         error: () => {
-          this.snackBar.open(ERROR_MESSAGES.CREATE_PRODUCT_FAILED, 'Close', { duration: 3000 });
+          this.snackBar.open(ERROR_MESSAGES.CREATE_PRODUCT_FAILED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
         }
       });
     }
@@ -147,11 +148,11 @@ export class AdminComponent implements OnInit, OnDestroy {
     if (confirm(MODAL_CONFIRMATIONS.DELETE_PRODUCT(product.name || ''))) {
       this.productsService.deleteProduct(product.id!).subscribe({
         next: () => {
-          this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_DELETED, 'Close', { duration: 3000 });
+          this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_DELETED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
           this.loadProducts();
         },
         error: () => {
-          this.snackBar.open(ERROR_MESSAGES.DELETE_PRODUCT_FAILED, 'Close', { duration: 3000 });
+          this.snackBar.open(ERROR_MESSAGES.DELETE_PRODUCT_FAILED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
         }
       });
     }
@@ -176,16 +177,16 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.productsService.importProducts(this.selectedFile()!).subscribe({
       next: (response) => {
         if (response.taskId) {
-          this.snackBar.open(SUCCESS_MESSAGES.CSV_UPLOADED, 'Close', { duration: 3000 });
+          this.snackBar.open(SUCCESS_MESSAGES.CSV_UPLOADED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
           this.startPolling(response.taskId);
         } else {
           this.isUploading.set(false);
-          this.snackBar.open('Upload failed. No taskId returned.', 'Close', { duration: 3000 });
+          this.snackBar.open(ERROR_MESSAGES.UPLOAD_CSV_FAILED_NO_TASK_ID, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
         }
       },
       error: () => {
         this.isUploading.set(false);
-        this.snackBar.open(ERROR_MESSAGES.UPLOAD_CSV_FAILED, 'Close', { duration: 3000 });
+        this.snackBar.open(ERROR_MESSAGES.UPLOAD_CSV_FAILED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
       }
     });
   }
@@ -201,19 +202,19 @@ export class AdminComponent implements OnInit, OnDestroy {
     
     this.pollSubscription = interval(2000).pipe(
       switchMap(() => this.productsService.getImportStatus(taskId)),
-      takeWhile(status => status.status === 'QUEUED' || status.status === 'PROCESSING', true)
+      takeWhile(status => status.status === ImportStatus.QUEUED || status.status === ImportStatus.PROCESSING, true)
     ).subscribe({
       next: (status) => {
         this.importStatus.set(status);
-        if (status.status === 'COMPLETED') {
+        if (status.status === ImportStatus.COMPLETED) {
           this.isUploading.set(false);
           this.selectedFile.set(null);
-          this.snackBar.open(SUCCESS_MESSAGES.IMPORT_COMPLETED, 'Refresh', { duration: 5000 })
+          this.snackBar.open(SUCCESS_MESSAGES.IMPORT_COMPLETED, SNACKBAR_ACTIONS.REFRESH, { duration: 5000 })
             .onAction().subscribe(() => this.loadProducts());
           this.stopPolling();
-        } else if (status.status === 'FAILED') {
+        } else if (status.status === ImportStatus.FAILED) {
           this.isUploading.set(false);
-          this.snackBar.open(ERROR_MESSAGES.IMPORT_FAILED, 'Close', { duration: 5000 });
+          this.snackBar.open(ERROR_MESSAGES.IMPORT_FAILED, SNACKBAR_ACTIONS.CLOSE, { duration: 5000 });
           this.stopPolling();
         }
       },
@@ -243,12 +244,12 @@ export class AdminComponent implements OnInit, OnDestroy {
     this.ordersService.clearOrders().subscribe({
       next: () => {
         this.isResetting.set(false);
-        this.snackBar.open(SUCCESS_MESSAGES.SYSTEM_RESET_COMPLETE, 'Close', { duration: 5000 });
+        this.snackBar.open(SUCCESS_MESSAGES.SYSTEM_RESET_COMPLETE, SNACKBAR_ACTIONS.CLOSE, { duration: 5000 });
         this.loadProducts();
       },
       error: () => {
         this.isResetting.set(false);
-        this.snackBar.open(ERROR_MESSAGES.RESET_FAILED, 'Close', { duration: 4000 });
+        this.snackBar.open(ERROR_MESSAGES.RESET_FAILED, SNACKBAR_ACTIONS.CLOSE, { duration: 4000 });
       }
     });
   }

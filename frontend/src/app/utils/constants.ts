@@ -12,7 +12,8 @@ export const ERROR_MESSAGES = {
   MISSING_PRODUCT_ID: 'Cannot add item: product ID is missing.',
   UPDATE_CART_FAILED: 'Could not update cart.',
   REMOVE_CART_ITEM_FAILED: 'Could not remove item.',
-  CHECKOUT_FAILED: 'Checkout failed. Please try again.'
+  CHECKOUT_FAILED: 'Checkout failed. Please try again.',
+  UPLOAD_CSV_FAILED_NO_TASK_ID: 'Upload failed. No taskId returned.'
 };
 
 export const SUCCESS_MESSAGES = {
@@ -28,4 +29,11 @@ export const SUCCESS_MESSAGES = {
 export const MODAL_CONFIRMATIONS = {
   DELETE_PRODUCT: (productName: string) => `Are you sure you want to delete ${productName}?`,
   SYSTEM_RESET: 'This will delete ALL orders and restore all product stock. Continue?'
+};
+
+export const SNACKBAR_ACTIONS = {
+  CLOSE: 'Close',
+  REFRESH: 'Refresh',
+  LOGIN: 'Login',
+  VIEW_CART: 'View Cart'
 };
