@@ -4,19 +4,21 @@ WORKDIR /app
 
 # Copy dependency configs
 COPY package*.json ./
-RUN npm ci
+
+# Use BuildKit cache mount for npm to speed up package installation and avoid downloading packages from scratch
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # Copy sources and build the Angular application
 COPY . .
 RUN npm run build -- --configuration=production
 
-# Stage 2: Serve stage
+# Stage 2: Runtime stage
 FROM nginx:alpine
 
-# Copy built application assets to Nginx default public directory
+# Copy built application from build stage
 COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
 
-# Copy custom Nginx configuration
+# Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port

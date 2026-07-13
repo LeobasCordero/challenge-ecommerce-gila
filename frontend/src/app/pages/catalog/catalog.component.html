@@ -52,10 +52,10 @@
         </mat-card-content>
 
         <mat-card-footer class="product-card-footer">
-          <span class="product-price">${{ (product.price ?? 0).toFixed(2) }}</span>
+          <span class="product-price">${{ product.price.toFixed(2) }}</span>
           <button mat-raised-button color="primary" id="add-to-cart-{{ product.id }}"
             class="add-to-cart-btn" (click)="addToCart(product)"
-            [disabled]="(product.stock ?? 0) === 0 || isAddingToCart()">
+            [disabled]="product.stock === 0 || isAddingToCart()">
             <mat-icon>add_shopping_cart</mat-icon>
             <span i18n="@@addToCartBtn">Add</span>
           </button>
@@ -87,24 +87,24 @@
       <div class="cart-items" *ngIf="cartState.itemCount() > 0">
         <div class="cart-item" *ngFor="let item of cartState.cart()?.items ?? []">
           <div class="cart-item-info">
-            <span class="cart-item-name">{{ item.product?.name }}</span>
-            <span class="cart-item-price">${{ ((item.product?.price ?? 0) * (item.quantity ?? 0)).toFixed(2) }}</span>
+            <span class="cart-item-name">{{ item.product.name }}</span>
+            <span class="cart-item-price">${{ (item.product.price * item.quantity).toFixed(2) }}</span>
           </div>
           <div class="cart-item-controls">
-            <button mat-icon-button class="qty-btn" id="decrease-qty-{{ item.product?.id }}"
+            <button mat-icon-button class="qty-btn" id="decrease-qty-{{ item.product.id }}"
               (click)="changeQuantity(item, -1)"
               [disabled]="isUpdatingCart()"
               aria-label="Decrease quantity">
               <mat-icon>remove</mat-icon>
             </button>
             <span class="cart-item-qty">{{ item.quantity }}</span>
-            <button mat-icon-button class="qty-btn" id="increase-qty-{{ item.product?.id }}"
+            <button mat-icon-button class="qty-btn" id="increase-qty-{{ item.product.id }}"
               (click)="changeQuantity(item, 1)"
-              [disabled]="isUpdatingCart() || (item.quantity ?? 0) >= (item.product?.stock ?? 0)"
+              [disabled]="isUpdatingCart() || item.quantity >= item.product.stock"
               aria-label="Increase quantity">
               <mat-icon>add</mat-icon>
             </button>
-            <button mat-icon-button class="remove-btn" id="remove-item-{{ item.product?.id }}"
+            <button mat-icon-button class="remove-btn" id="remove-item-{{ item.product.id }}"
               (click)="removeFromCart(item)"
               [disabled]="isUpdatingCart()"
               aria-label="Remove item">

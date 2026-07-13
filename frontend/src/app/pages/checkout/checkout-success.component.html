@@ -27,12 +27,12 @@
       <!-- Items list -->
       <h3 class="items-title" i18n="@@orderItemsTitle">Items Purchased</h3>
       <div class="order-items">
-        <div class="order-item" *ngFor="let item of order.items ?? []" id="order-item-{{ item.product?.id }}">
+        <div class="order-item" *ngFor="let item of order.items" id="order-item-{{ item.product.id }}">
           <div class="order-item-info">
-            <span class="order-item-name">{{ item.product?.name }}</span>
+            <span class="order-item-name">{{ item.product.name }}</span>
             <span class="order-item-qty" i18n="@@orderItemQtyLabel">× {{ item.quantity }}</span>
           </div>
-          <span class="order-item-price">${{ ((item.priceAtPurchase ?? 0) * (item.quantity ?? 0)).toFixed(2) }}</span>
+          <span class="order-item-price">${{ (item.priceAtPurchase * item.quantity).toFixed(2) }}</span>
         </div>
       </div>
 
@@ -41,7 +41,7 @@
       <!-- Total -->
       <div class="order-total-row">
         <span class="order-total-label" i18n="@@orderTotalLabel">Total Paid</span>
-        <span class="order-total-amount" id="order-total">${{ (order.totalPrice ?? 0).toFixed(2) }}</span>
+        <span class="order-total-amount" id="order-total">${{ order.totalPrice.toFixed(2) }}</span>
       </div>
     </div>
 
