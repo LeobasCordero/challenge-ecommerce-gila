@@ -1,0 +1,34 @@
+# Allow standard search engines and LLM crawlers
+User-agent: *
+Disallow: /admin/
+Disallow: /login/
+Disallow: /cart/
+Disallow: /checkout/
+
+# Friendly crawlers
+User-agent: GPTBot
+Allow: /catalog/
+Allow: /
+Disallow: /admin/
+Disallow: /login/
+
+User-agent: ClaudeBot
+Allow: /catalog/
+Allow: /
+Disallow: /admin/
+Disallow: /login/
+
+User-agent: Google-Extended
+Allow: /catalog/
+Allow: /
+Disallow: /admin/
+Disallow: /login/
+
+User-agent: Bingbot
+Allow: /catalog/
+Allow: /
+Disallow: /admin/
+Disallow: /login/
+
+# Sitemap location
+Sitemap: http://localhost/sitemap.xml
