@@ -1,0 +1,59 @@
+<div class="chatbot-container" *ngIf="authState.isAuthenticated()">
+  <!-- Floating Action Button -->
+  <button class="chatbot-toggle-btn" (click)="toggleChat()" [class.open]="isOpen()">
+    <i class="chat-icon" *ngIf="!isOpen()">💬</i>
+    <i class="chat-icon close" *ngIf="isOpen()">✖</i>
+  </button>
+
+  <!-- Chat Panel Window -->
+  <div class="chatbot-panel" *ngIf="isOpen()">
+    <div class="chatbot-header">
+      <span class="header-title">E-Commerce Assistant</span>
+      <button class="header-close-btn" (click)="toggleChat()">✖</button>
+    </div>
+
+    <!-- Messages Area -->
+    <div class="chatbot-messages" #messageContainer>
+      <div class="message-wrapper" *ngFor="let msg of messages()" [class.user]="msg.sender === 'user'">
+        <div class="message-bubble" [class.user]="msg.sender === 'user'">
+          <div class="message-text">{{ msg.text }}</div>
+          <div class="message-time">{{ msg.time | date:'shortTime' }}</div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="message-wrapper" *ngIf="isLoading()">
+        <div class="message-bubble bot typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggested Actions Chips -->
+    <div class="chatbot-suggestions" *ngIf="!isLoading()">
+      <button class="suggestion-chip" (click)="sendMessage('What is the most sold product?')">
+        Most Sold
+      </button>
+      <button class="suggestion-chip" (click)="sendMessage('What is the today\'s sales volume?')">
+        Today's Sales
+      </button>
+      <button class="suggestion-chip" (click)="sendMessage('Which products are low in stock?')">
+        Low Stock
+      </button>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="chatbot-input-bar">
+      <input 
+        type="text" 
+        placeholder="Ask about products/stats..." 
+        [(ngModel)]="userMessage" 
+        (keyup.enter)="sendMessage()"
+        [disabled]="isLoading()"
+      />
+      <button class="chatbot-send-btn" (click)="sendMessage()" [disabled]="isLoading() || !userMessage.trim()">
+        ➔
+      </button>
+    </div>
+  </div>
+</div>
