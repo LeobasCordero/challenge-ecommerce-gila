@@ -5,12 +5,12 @@ WORKDIR /app
 # Copy dependency configs
 COPY package*.json ./
 
-# Install Dependencies
-RUN npm ci --no-audit --no-fund
+# Install Dependencies with NPM cache mount and offline preference
+RUN --mount=type=cache,target=/root/.npm npm ci --prefer-offline --no-audit --no-fund
 
-# Copy sources and build the Angular application
+# Copy sources and build the Angular application with Angular cache mount
 COPY . .
-RUN npm run build -- --configuration=production
+RUN --mount=type=cache,target=/app/.angular/cache npm run build -- --configuration=production
 
 # Stage 2: Runtime stage
 FROM nginx:alpine

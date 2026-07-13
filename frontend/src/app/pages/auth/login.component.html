@@ -39,6 +39,20 @@
           <span *ngIf="!isLoading()" i18n="@@loginBtn">Login</span>
         </button>
       </form>
+
+      <div class="demo-users-section">
+        <p class="demo-title" i18n="@@testAccountsTitle">Test Accounts</p>
+        <div class="demo-buttons">
+          <button mat-stroked-button type="button" class="demo-btn" id="demo-admin-btn" (click)="fillCredentials('admin', 'password')">
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span i18n="@@adminDemoAccount">Admin (admin / password)</span>
+          </button>
+          <button mat-stroked-button type="button" class="demo-btn" id="demo-customer-btn" (click)="fillCredentials('customer', 'password')">
+            <mat-icon>person</mat-icon>
+            <span i18n="@@customerDemoAccount">Customer (customer / password)</span>
+          </button>
+        </div>
+      </div>
     </mat-card-content>
   </mat-card>
 </div>
