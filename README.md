@@ -100,6 +100,14 @@ A modular, reusable GitHub Actions pipeline is configured under `.github/workflo
 2.  **Backend Pipeline (`backend.yml`):** Downloads the generated Pact contracts, sets up JDK 17, caches Maven libraries, compiles the project, verifies static rules (PMD/Checkstyle), and runs all JUnit/Pact tests.
 3.  **Orchestrator (`ci.yml`):** Coordinates the execution sequence sequentially (Backend waits for Frontend) to enforce a strict fail-fast pipeline.
 4.  **Deployment Pipeline (`deploy.yml`):** Build-caches Docker layers and pushes the final verified images to Docker Hub on every release push to `main`.
+    
+    > [!NOTE]
+    > **Docker Hub CD Configuration:**
+    > To allow the deployment pipeline to succeed, configure the following secrets in your GitHub repository settings (`Settings -> Secrets and variables -> Actions`):
+    > * `DOCKER_USERNAME`: Your Docker Hub registry username.
+    > * `DOCKER_TOKEN`: A Personal Access Token (PAT) generated in your Docker Hub account settings.
+    > 
+    > If these secrets are not configured, the CD workflow will fail at the login stage. This failure is safe to ignore for local-only evaluations and does not impact the CI validation workflow (`ci.yml`).
 
 ---
 
