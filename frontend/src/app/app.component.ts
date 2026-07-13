@@ -9,6 +9,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { AuthStateService } from './services/auth-state.service';
 import { CartStateService } from './services/cart-state.service';
 import { APP_ROUTES } from './utils/constants';
+import { ChatbotComponent } from './components/chatbot/chatbot.component';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +21,8 @@ import { APP_ROUTES } from './utils/constants';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
-    MatMenuModule
+    MatMenuModule,
+    ChatbotComponent
   ],
   templateUrl: './app.component.html'
 })
