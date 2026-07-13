@@ -8,4 +8,6 @@ export * from './orders.service';
 import { OrdersService } from './orders.service';
 export * from './products.service';
 import { ProductsService } from './products.service';
-export const APIS = [AuditLogsService, AuthService, CartService, OrdersService, ProductsService];
+export * from './chatbot.service';
+import { ChatbotService } from './chatbot.service';
+export const APIS = [AuditLogsService, AuthService, CartService, OrdersService, ProductsService, ChatbotService];

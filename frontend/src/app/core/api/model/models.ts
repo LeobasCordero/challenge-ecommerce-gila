@@ -9,3 +9,5 @@ export * from './orderDto';
 export * from './orderItemDto';
 export * from './productDto';
 export * from './productImportStatusDto';
+export * from './chatbotRequestDto';
+export * from './chatbotResponseDto';
