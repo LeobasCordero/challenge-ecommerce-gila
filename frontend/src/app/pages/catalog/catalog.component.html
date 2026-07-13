@@ -3,7 +3,7 @@
   <section class="filters-section">
     <div class="search-box">
       <mat-form-field appearance="outline" class="search-field">
-        <mat-label i18n="@@searchPlaceholder">Search products...</mat-label>
+        <mat-label>{{ 'searchPlaceholder' | translate }}</mat-label>
         <input matInput [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Type product name or description...">
         <mat-icon matSuffix>search</mat-icon>
       </mat-form-field>
@@ -11,9 +11,9 @@
 
     <div class="category-box">
       <mat-form-field appearance="outline" class="category-field">
-        <mat-label i18n="@@categoryLabel">Category</mat-label>
+        <mat-label>{{ 'categoryLabel' | translate }}</mat-label>
         <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onFilterChange()">
-          <mat-option value="" i18n="@@allCategories">All Categories</mat-option>
+          <mat-option value="">{{ 'allCategories' | translate }}</mat-option>
           <mat-option *ngFor="let cat of categories()" [value]="cat">{{ cat }}</mat-option>
         </mat-select>
       </mat-form-field>
@@ -29,17 +29,17 @@
     <div class="empty-state" *ngIf="!isLoading() && products().length === 0">
       <ng-container *ngIf="searchQuery === '' && selectedCategory === ''; else searchEmptyState">
         <mat-icon class="empty-icon">inventory</mat-icon>
-        <p *ngIf="!authState.isAdmin()" i18n="@@catalogEmptyCustomer">Welcome! No products in stock. Please contact an administrator to load products.</p>
+        <p *ngIf="!authState.isAdmin()">{{ 'catalogEmptyCustomer' | translate }}</p>
         <div *ngIf="authState.isAdmin()" class="admin-empty-cta">
-          <p i18n="@@catalogEmptyAdmin">No products in stock. Go to Product Manager to load products.</p>
-          <a mat-raised-button color="primary" [routerLink]="['/admin']" id="btn-empty-go-manager" i18n="@@goManagerBtn">
-            <mat-icon>settings</mat-icon> Go to Product Manager
+          <p>{{ 'catalogEmptyAdmin' | translate }}</p>
+          <a mat-raised-button color="primary" [routerLink]="['/admin']" id="btn-empty-go-manager">
+            <mat-icon>settings</mat-icon> {{ 'goManagerBtn' | translate }}
           </a>
         </div>
       </ng-container>
       <ng-template #searchEmptyState>
         <mat-icon class="empty-icon">search_off</mat-icon>
-        <p i18n="@@noProductsFound">No products found matching your criteria.</p>
+        <p>{{ 'noProductsFound' | translate }}</p>
       </ng-template>
     </div>
 
@@ -58,7 +58,7 @@
           <p class="card-description">{{ product.description }}</p>
           <div class="product-specs">
             <span class="stock-info" [class.low-stock]="isLowStock(product)">
-              <span i18n="@@stockLabel">Stock:</span> {{ product.stock }}
+              <span>{{ 'stockLabel' | translate }}</span> {{ product.stock }}
             </span>
           </div>
         </mat-card-content>
@@ -69,7 +69,7 @@
             class="add-to-cart-btn" (click)="addToCart(product)"
             [disabled]="product.stock === 0 || isAddingToCart()">
             <mat-icon>add_shopping_cart</mat-icon>
-            <span i18n="@@addToCartBtn">Add</span>
+            <span>{{ 'addToCartBtn' | translate }}</span>
           </button>
         </mat-card-footer>
       </mat-card>
@@ -77,8 +77,8 @@
 
     <!-- Load More dynamic panel -->
     <div class="load-more-container" *ngIf="hasMoreProducts && !isLoading() && products().length > 0">
-      <button mat-stroked-button color="primary" class="load-more-btn" (click)="loadProducts()" id="btn-load-more" i18n="@@loadMoreBtn">
-        <mat-icon>expand_more</mat-icon> Load More Products
+      <button mat-stroked-button color="primary" class="load-more-btn" (click)="loadProducts()" id="btn-load-more">
+        <mat-icon>expand_more</mat-icon> {{ 'loadMoreBtn' | translate }}
       </button>
     </div>
   </section>
@@ -88,7 +88,7 @@
     aria-label="Close cart overlay" tabindex="-1"></button>
   <aside class="cart-sidebar" [class.open]="isCartOpen()" aria-label="Shopping cart">
     <div class="cart-sidebar-header">
-      <h3 i18n="@@cartTitle">Shopping Cart</h3>
+      <h3>{{ 'cartTitle' | translate }}</h3>
       <button mat-icon-button id="close-cart-btn" (click)="closeCart()" aria-label="Close cart">
         <mat-icon>close</mat-icon>
       </button>
@@ -99,7 +99,7 @@
       <!-- Empty state -->
       <div class="cart-empty" *ngIf="cartState.itemCount() === 0">
         <mat-icon class="cart-empty-icon">shopping_cart_off</mat-icon>
-        <p i18n="@@cartEmptyMessage">Your cart is empty.</p>
+        <p>{{ 'cartEmptyMessage' | translate }}</p>
       </div>
 
       <!-- Cart items list -->
@@ -136,7 +136,7 @@
 
         <!-- Cart totals -->
         <div class="cart-totals">
-          <span class="cart-total-label" i18n="@@cartTotalLabel">Total</span>
+          <span class="cart-total-label">{{ 'cartTotalLabel' | translate }}</span>
           <span class="cart-total-amount">${{ cartState.totalPrice().toFixed(2) }}</span>
         </div>
       </div>
@@ -149,10 +149,10 @@
         [disabled]="cartState.itemCount() === 0 || isCheckingOut() || !authState.isAuthenticated()">
         <mat-spinner *ngIf="isCheckingOut()" diameter="18" class="checkout-spinner"></mat-spinner>
         <mat-icon *ngIf="!isCheckingOut()">shopping_bag</mat-icon>
-        <span i18n="@@buyNowBtn">Buy Now</span>
+        <span>{{ 'buyNowBtn' | translate }}</span>
       </button>
-      <p *ngIf="!authState.isAuthenticated()" class="login-to-checkout" i18n="@@loginToCheckout">
-        <a routerLink="/login">Login</a> to checkout
+      <p *ngIf="!authState.isAuthenticated()" class="login-to-checkout">
+        <a routerLink="/login">{{ 'loginBtn' | translate }}</a> {{ 'loginToCheckout' | translate }}
       </p>
     </div>
   </aside>

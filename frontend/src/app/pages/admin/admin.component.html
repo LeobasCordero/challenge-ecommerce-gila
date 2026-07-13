@@ -4,64 +4,64 @@
     <mat-card class="unauthorized-card">
       <mat-card-header>
         <mat-icon color="warn" class="unauth-icon">block</mat-icon>
-        <mat-card-title i18n="@@unauthorizedTitle">Access Denied</mat-card-title>
+        <mat-card-title>{{ 'unauthorizedTitle' | translate }}</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <p i18n="@@unauthorizedMsg">You do not have administrative permissions to access this control panel.</p>
+        <p>{{ 'unauthorizedMsg' | translate }}</p>
       </mat-card-content>
     </mat-card>
   </div>
 
   <div *ngIf="authState.isAdmin()">
-    <h1 i18n="@@adminDashboardTitle">Admin Dashboard</h1>
+    <h1>{{ 'adminDashboardTitle' | translate }}</h1>
 
     <mat-tab-group class="admin-tabs" (selectedTabChange)="onTabChange($event)">
       <!-- Products Catalog CRUD Tab -->
-      <mat-tab label="Products CRUD" i18n-label="@@tabCrud">
+      <mat-tab [label]="'tabCrud' | translate">
         <div class="tab-content">
           <!-- Edit/Create Product Card -->
           <mat-card class="product-form-card">
             <mat-card-header>
               <mat-card-title>
-                <span *ngIf="!isEditing()" i18n="@@createProductTitle">Create New Product</span>
-                <span *ngIf="isEditing()" i18n="@@editProductTitle">Edit Product</span>
+                <span *ngIf="!isEditing()">{{ 'createProductTitle' | translate }}</span>
+                <span *ngIf="isEditing()">{{ 'editProductTitle' | translate }}</span>
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
               <form [formGroup]="productForm" #formDir="ngForm" (ngSubmit)="saveProduct(formDir)" class="product-form">
                 <div class="form-row">
                   <mat-form-field appearance="outline">
-                    <mat-label i18n="@@prodName">Name</mat-label>
+                    <mat-label>{{ 'prodName' | translate }}</mat-label>
                     <input matInput formControlName="name" required>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
-                    <mat-label i18n="@@prodCategory">Category</mat-label>
+                    <mat-label>{{ 'prodCategory' | translate }}</mat-label>
                     <input matInput formControlName="category" required>
                   </mat-form-field>
                 </div>
 
                 <div class="form-row">
                   <mat-form-field appearance="outline">
-                    <mat-label i18n="@@prodPrice">Price</mat-label>
+                    <mat-label>{{ 'prodPrice' | translate }}</mat-label>
                     <input matInput type="number" formControlName="price" required>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline">
-                    <mat-label i18n="@@prodStock">Stock</mat-label>
+                    <mat-label>{{ 'prodStock' | translate }}</mat-label>
                     <input matInput type="number" formControlName="stock" required>
                   </mat-form-field>
                 </div>
 
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label i18n="@@prodDescription">Description</mat-label>
+                  <mat-label>{{ 'prodDescription' | translate }}</mat-label>
                   <textarea matInput formControlName="description" rows="3"></textarea>
                 </mat-form-field>
 
                 <div class="form-actions">
-                  <button mat-stroked-button type="button" *ngIf="isEditing()" (click)="cancelEdit()" i18n="@@cancelBtn">Cancel</button>
+                  <button mat-stroked-button type="button" *ngIf="isEditing()" (click)="cancelEdit()">{{ 'cancelBtn' | translate }}</button>
                   <button mat-raised-button color="primary" class="save-btn" type="submit" [disabled]="productForm.invalid">
-                    <span i18n="@@saveBtn">Save Product</span>
+                    <span>{{ 'saveBtn' | translate }}</span>
                   </button>
                 </div>
               </form>
@@ -72,27 +72,27 @@
           <div class="table-container">
             <table mat-table [dataSource]="products()" class="mat-elevation-z1 products-table">
               <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef i18n="@@tableName">Name</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'tableName' | translate }}</th>
                 <td mat-cell *matCellDef="let p">{{ p.name }}</td>
               </ng-container>
 
               <ng-container matColumnDef="category">
-                <th mat-header-cell *matHeaderCellDef i18n="@@tableCategory">Category</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'tableCategory' | translate }}</th>
                 <td mat-cell *matCellDef="let p">{{ p.category }}</td>
               </ng-container>
 
               <ng-container matColumnDef="price">
-                <th mat-header-cell *matHeaderCellDef i18n="@@tablePrice">Price</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'tablePrice' | translate }}</th>
                 <td mat-cell *matCellDef="let p">${{ (p.price ?? 0).toFixed(2) }}</td>
               </ng-container>
 
               <ng-container matColumnDef="stock">
-                <th mat-header-cell *matHeaderCellDef i18n="@@tableStock">Stock</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'tableStock' | translate }}</th>
                 <td mat-cell *matCellDef="let p">{{ p.stock }}</td>
               </ng-container>
 
               <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef i18n="@@tableActions">Actions</th>
+                <th mat-header-cell *matHeaderCellDef>{{ 'tableActions' | translate }}</th>
                 <td mat-cell *matCellDef="let p">
                   <button mat-icon-button color="primary" (click)="editProduct(p)" [attr.aria-label]="'Edit'">
                     <mat-icon>edit</mat-icon>
@@ -111,33 +111,33 @@
       </mat-tab>
 
       <!-- CSV Import Tab -->
-      <mat-tab label="CSV Bulk Import" i18n-label="@@tabCsv">
+      <mat-tab [label]="'tabCsv' | translate">
         <div class="tab-content">
           <mat-card class="import-card">
             <mat-card-header>
-              <mat-card-title i18n="@@importTitle">Import Products from CSV</mat-card-title>
+              <mat-card-title>{{ 'importTitle' | translate }}</mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <p class="import-instructions" i18n="@@importInstructions">Select a CSV file containing catalog details. Upload will parse and insert records asynchronously.</p>
+              <p class="import-instructions">{{ 'importInstructions' | translate }}</p>
               
               <div class="file-uploader-box">
                 <input type="file" #fileInput (change)="onFileSelected($event)" accept=".csv" class="hidden-file-input">
                 <button mat-raised-button color="accent" class="select-file-btn" (click)="fileInput.click()">
                   <mat-icon>attach_file</mat-icon>
-                  <span i18n="@@selectFileBtn">Select CSV File</span>
+                  <span>{{ 'selectFileBtn' | translate }}</span>
                 </button>
                 <span class="selected-file-name" *ngIf="selectedFile()">{{ selectedFile()?.name }}</span>
               </div>
 
               <div class="import-actions">
                 <button mat-raised-button color="primary" class="upload-btn" (click)="uploadCsv()" [disabled]="!selectedFile() || isUploading()">
-                  <span i18n="@@uploadBtn">Upload and Start Import</span>
+                  <span>{{ 'uploadBtn' | translate }}</span>
                 </button>
               </div>
 
               <!-- Real-time progress display -->
               <div class="progress-container" *ngIf="isUploading() || importStatus()">
-                <h3 i18n="@@importStatusHeader">Import Task Progress</h3>
+                <h3>{{ 'importStatusHeader' | translate }}</h3>
                 <div class="status-badge" [ngClass]="(importStatus()?.status || '').toLowerCase()">
                   {{ importStatus()?.status || 'QUEUED' }}
                 </div>
@@ -145,14 +145,14 @@
                 <mat-progress-bar mode="determinate" [value]="calcProgress()"></mat-progress-bar>
                 
                 <div class="progress-details" *ngIf="importStatus()">
-                  <div><span i18n="@@rowsTotal">Total rows found:</span> {{ importStatus()?.totalRows }}</div>
-                  <div><span i18n="@@rowsProcessed">Processed rows:</span> {{ importStatus()?.processedRows }}</div>
-                  <div><span i18n="@@rowsErrors">Error count:</span> {{ importStatus()?.errorCount }}</div>
+                  <div><span>{{ 'rowsTotal' | translate }}</span> {{ importStatus()?.totalRows }}</div>
+                  <div><span>{{ 'rowsProcessed' | translate }}</span> {{ importStatus()?.processedRows }}</div>
+                  <div><span>{{ 'rowsErrors' | translate }}</span> {{ importStatus()?.errorCount }}</div>
                 </div>
 
                 <!-- Row-level warning logs -->
                 <div class="warnings-box" *ngIf="importStatus()?.warnings?.length">
-                  <h4 i18n="@@warningsTitle">Import Logs & Warnings</h4>
+                  <h4>{{ 'warningsTitle' | translate }}</h4>
                   <ul>
                     <li *ngFor="let w of importStatus()?.warnings">{{ w }}</li>
                   </ul>
@@ -164,17 +164,16 @@
       </mat-tab>
 
       <!-- System Reset Tab -->
-      <mat-tab label="System Reset" i18n-label="@@tabReset">
+      <mat-tab [label]="'navReset' | translate">
         <div class="tab-content">
           <mat-card class="reset-card">
             <mat-card-header>
               <mat-icon class="reset-icon">warning_amber</mat-icon>
-              <mat-card-title i18n="@@resetTitle">Reset System for UAT</mat-card-title>
+              <mat-card-title>{{ 'resetTitle' | translate }}</mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <p class="reset-description" i18n="@@resetDescription">
-                This action permanently deletes all orders and restores every product's stock to its initial value.
-                Use this only to reset the application state for evaluator testing.
+              <p class="reset-description">
+                {{ 'resetDescription' | translate }}
               </p>
               <mat-divider class="reset-divider"></mat-divider>
               <div class="reset-actions">
@@ -184,10 +183,9 @@
                   id="btn-reset-orders"
                   class="reset-btn"
                   [disabled]="isResetting()"
-                  (click)="clearOrders()"
-                  i18n="@@resetBtn">
+                  (click)="clearOrders()">
                   <mat-icon>delete_sweep</mat-icon>
-                  Reset All Orders &amp; Restore Stock
+                  {{ 'resetBtn' | translate }}
                 </button>
               </div>
             </mat-card-content>
@@ -196,7 +194,7 @@
       </mat-tab>
 
       <!-- System Audit Logs Tab -->
-      <mat-tab label="System Audit Logs" i18n-label="@@tabAuditLogs">
+      <mat-tab [label]="'tabAuditLogs' | translate">
         <div class="tab-content">
           <div class="logs-header-actions">
             <button mat-stroked-button color="primary" (click)="loadAuditLogs()" class="refresh-btn">
@@ -258,7 +256,7 @@
       </mat-tab>
 
       <!-- Telemetry Logs Tab -->
-      <mat-tab label="Telemetry Analytics" i18n-label="@@tabTelemetry">
+      <mat-tab [label]="'tabTelemetry' | translate">
         <div class="tab-content">
           <div class="logs-header-actions">
             <button mat-stroked-button color="primary" (click)="loadTelemetryLogs()" class="refresh-btn">

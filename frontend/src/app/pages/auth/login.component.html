@@ -2,31 +2,31 @@
   <mat-card class="login-card">
     <mat-card-header>
       <mat-card-title>
-        <span i18n="@@loginTitle">Login to Gila Store</span>
+        <span>{{ 'loginTitle' | translate }}</span>
       </mat-card-title>
       <mat-card-subtitle>
-        <span i18n="@@loginSubtitle">Enter your credentials below</span>
+        <span>{{ 'loginSubtitle' | translate }}</span>
       </mat-card-subtitle>
     </mat-card-header>
     
     <mat-card-content>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label i18n="@@usernameLabel">Username</mat-label>
+          <mat-label>{{ 'usernameLabel' | translate }}</mat-label>
           <input matInput formControlName="username" placeholder="e.g. admin or customer" required>
           <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
-            <span i18n="@@usernameRequired">Username is required</span>
+            <span>{{ 'usernameRequired' | translate }}</span>
           </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label i18n="@@passwordLabel">Password</mat-label>
+          <mat-label>{{ 'passwordLabel' | translate }}</mat-label>
           <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" required>
           <button mat-icon-button matSuffix (click)="hidePassword.set(!hidePassword())" type="button" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword()">
             <mat-icon>{{hidePassword() ? 'visibility_off' : 'visibility'}}</mat-icon>
           </button>
           <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
-            <span i18n="@@passwordRequired">Password is required</span>
+            <span>{{ 'passwordRequired' | translate }}</span>
           </mat-error>
         </mat-form-field>
 
@@ -36,20 +36,20 @@
 
         <button mat-raised-button color="primary" class="full-width login-button" type="submit" [disabled]="loginForm.invalid || isLoading()">
           <mat-spinner diameter="20" *ngIf="isLoading()" class="spinner"></mat-spinner>
-          <span *ngIf="!isLoading()" i18n="@@loginBtn">Login</span>
+          <span *ngIf="!isLoading()">{{ 'loginBtn' | translate }}</span>
         </button>
       </form>
 
       <div class="demo-users-section">
-        <p class="demo-title" i18n="@@testAccountsTitle">Test Accounts</p>
+        <p class="demo-title">{{ 'testAccountsTitle' | translate }}</p>
         <div class="demo-buttons">
           <button mat-stroked-button type="button" class="demo-btn" id="demo-admin-btn" (click)="fillCredentials('admin', 'password')">
             <mat-icon>admin_panel_settings</mat-icon>
-            <span i18n="@@adminDemoAccount">Admin (admin / password)</span>
+            <span>{{ 'adminDemoAccount' | translate }}</span>
           </button>
           <button mat-stroked-button type="button" class="demo-btn" id="demo-customer-btn" (click)="fillCredentials('customer', 'password')">
             <mat-icon>person</mat-icon>
-            <span i18n="@@customerDemoAccount">Customer (customer / password)</span>
+            <span>{{ 'customerDemoAccount' | translate }}</span>
           </button>
         </div>
       </div>

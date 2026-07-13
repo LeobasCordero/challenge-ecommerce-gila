@@ -11,8 +11,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AuthService } from '../../core/api/api/auth.service';
 import { AuthStateService } from '../../services/auth-state.service';
-import { ERROR_MESSAGES, APP_ROUTES } from '../../utils/constants';
+import { TranslationService } from '../../services/translation.service';
+import { APP_ROUTES } from '../../utils/constants';
 import { UserRole } from '../../utils/enums';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +28,8 @@ import { UserRole } from '../../utils/enums';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    TranslatePipe
   ],
   templateUrl: './login.component.html'
 })
@@ -35,6 +38,7 @@ export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly authState = inject(AuthStateService);
   private readonly router = inject(Router);
+  public readonly ts = inject(TranslationService);
 
   public readonly routes = APP_ROUTES;
 
@@ -72,7 +76,7 @@ export class LoginComponent implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set(ERROR_MESSAGES.LOGIN_FAILED);
+        this.errorMessage.set(this.ts.t('loginFailed'));
       }
     });
   }

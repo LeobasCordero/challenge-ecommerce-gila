@@ -23,8 +23,10 @@ import { ProductImportStatusDto } from '../../core/api/model/productImportStatus
 import { AuditLogDto } from '../../core/api/model/auditLogDto';
 import { AuthStateService } from '../../services/auth-state.service';
 import { TelemetryService } from '../../services/telemetry.service';
+import { TranslationService } from '../../services/translation.service';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, MODAL_CONFIRMATIONS, SNACKBAR_ACTIONS } from '../../utils/constants';
 import { ImportStatus } from '../../utils/enums';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-admin',
@@ -43,11 +45,13 @@ import { ImportStatus } from '../../utils/enums';
     MatProgressBarModule,
     MatDividerModule,
     MatSnackBarModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    TranslatePipe
   ],
   templateUrl: './admin.component.html'
 })
 export class AdminComponent implements OnInit, OnDestroy {
+  public readonly ts = inject(TranslationService);
   public readonly authState = inject(AuthStateService);
   private readonly productsService = inject(ProductsService);
   private readonly ordersService = inject(OrdersService);
