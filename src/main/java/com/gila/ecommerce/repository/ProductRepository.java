@@ -33,8 +33,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
      * @return page of matching product results
      */
     @Query("SELECT p FROM Product p WHERE "
-            + "(:category IS NULL OR TRIM(:category) = '' OR LOWER(p.category) = LOWER(TRIM(:category))) AND "
-            + "(:query IS NULL OR TRIM(:query) = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', TRIM(:query), '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', TRIM(:query), '%')))")
+            + "(CAST(:category AS string) IS NULL OR LOWER(p.category) = LOWER(CAST(:category AS string))) AND "
+            + "(CAST(:query AS string) IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', CAST(:query AS string), '%')))")
     Page<Product> findProductsByFilter(
             @Param("query") String query,
             @Param("category") String category,
