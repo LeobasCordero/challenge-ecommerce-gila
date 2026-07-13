@@ -27,6 +27,7 @@ ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.securit
 
 # Use NON root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN mkdir -p /app/temp-imports && chown -R appuser:appgroup /app
 USER appuser
 
 # Expose port
