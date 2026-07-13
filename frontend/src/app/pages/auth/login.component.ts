@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -30,13 +30,19 @@ import { UserRole } from '../../utils/enums';
   ],
   templateUrl: './login.component.html'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly authState = inject(AuthStateService);
   private readonly router = inject(Router);
 
   public readonly routes = APP_ROUTES;
+
+  public ngOnInit(): void {
+    if (this.authState.isAuthenticated()) {
+      this.router.navigate([this.routes.CATALOG]);
+    }
+  }
 
   public readonly hidePassword = signal<boolean>(true);
   public readonly isLoading = signal<boolean>(false);
