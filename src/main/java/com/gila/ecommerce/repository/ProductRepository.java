@@ -49,4 +49,12 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Product p WHERE p.id = :id")
     Optional<Product> findWithLockById(@Param("id") UUID id);
+
+    /**
+     * Retrieve products with stock level below a threshold limit.
+     * @param limit stock threshold value
+     * @return list of products with low stock levels
+     */
+    @Query("SELECT p FROM Product p WHERE p.stock < :limit")
+    java.util.List<Product> findLowStockProducts(@Param("limit") Integer limit);
 }
