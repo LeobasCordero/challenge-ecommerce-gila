@@ -21,13 +21,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OpaAuthorizationFilter opaAuthorizationFilter;
 
     /**
-     * Constructor injecting filter dependency.
+     * Constructor injecting filter dependencies.
      * @param jwtAuthenticationFilter JWT extraction and session mapping filter
+     * @param opaAuthorizationFilter OPA authorization request filter
      */
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            OpaAuthorizationFilter opaAuthorizationFilter
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.opaAuthorizationFilter = opaAuthorizationFilter;
     }
 
     /**
@@ -59,6 +65,7 @@ public class SecurityConfig {
             );
 
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(opaAuthorizationFilter, JwtAuthenticationFilter.class);
         return http.build();
     }
 
