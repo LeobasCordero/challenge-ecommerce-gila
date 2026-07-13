@@ -4,11 +4,14 @@ WORKDIR /app
 
 # Copy pom.xml, config rulesets, and source code
 COPY pom.xml .
-COPY config ./config
-COPY src ./src
+RUN mvn dependency:go-offline -B
 
-# Compile and package using BuildKit cache mount to accelerate builds and avoid downloading dependencies repeatedly
-RUN --mount=type=cache,target=/root/.m2 mvn package -DskipTests -B
+# Copy source code
+COPY src ./src
+COPY config ./config
+
+# Compile and package
+RUN mvn package -DskipTests -B
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:17-jre-alpine
@@ -16,6 +19,13 @@ WORKDIR /app
 
 # Copy built jar from build stage
 COPY --from=build /app/target/*.jar app.jar
+
+# JVM optimized config
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Djava.security.egd=file:/dev/./urandom"
+
+# Use NON root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
 
 # Expose port
 EXPOSE 8080
