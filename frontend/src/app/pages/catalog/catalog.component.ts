@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, PLATFORM_ID, HostListener } from '@angular/core';
-import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { isPlatformBrowser, CommonModule, DOCUMENT } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Title, Meta } from '@angular/platform-browser';
 
 import { ProductsService } from '../../core/api/api/products.service';
 import { CartService as CartApiService } from '../../core/api/api/cart.service';
@@ -52,6 +53,9 @@ export class CatalogComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly titleService = inject(Title);
+  private readonly metaService = inject(Meta);
+  private readonly document = inject(DOCUMENT);
 
   public readonly routes = APP_ROUTES;
 
@@ -98,6 +102,8 @@ export class CatalogComponent implements OnInit {
           this.products.update(current => [...current, ...data]);
         }
         
+        this.updateSEOAndMicrodata(this.products());
+
         if (data.length < pageSize) {
           this.hasMoreProducts = false;
         } else {
@@ -110,6 +116,53 @@ export class CatalogComponent implements OnInit {
         this.snackBar.open(ERROR_MESSAGES.FETCH_PRODUCTS_FAILED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
       }
     });
+  }
+
+  /** Update Title, Meta SEO crawlers information, and dynamic JSON-LD schema microdata. */
+  private updateSEOAndMicrodata(productList: ProductDto[]): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // 1. Title & Meta tag optimizations
+    this.titleService.setTitle('Gila Store - Product Catalog');
+    this.metaService.updateTag({ name: 'description', content: 'Explore our catalog of high-quality products. Check stock, read details, and purchase items directly.' });
+    this.metaService.updateTag({ property: 'og:title', content: 'Gila Store - Product Catalog' });
+    this.metaService.updateTag({ property: 'og:description', content: 'Explore our catalog of high-quality products. Check stock, read details, and purchase items directly.' });
+
+    // 2. Structured JSON-LD microdata schema block
+    const sldElementId = 'gila-jsonld-schema';
+    let scriptElement = this.document.getElementById(sldElementId) as HTMLScriptElement;
+    if (scriptElement) {
+      scriptElement.remove();
+    }
+
+    scriptElement = this.document.createElement('script');
+    scriptElement.id = sldElementId;
+    scriptElement.type = 'application/ld+json';
+
+    const itemListJson = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      'numberOfItems': productList.length,
+      'itemListElement': productList.map((product, index) => ({
+        '@type': 'ListItem',
+        'position': index + 1,
+        'item': {
+          '@type': 'Product',
+          'name': product.name,
+          'description': product.description,
+          'image': 'https://placehold.co/600x400?text=' + encodeURIComponent(product.name),
+          'offers': {
+            '@type': 'Offer',
+            'price': product.price,
+            'priceCurrency': 'USD',
+            'availability': product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'
+          }
+        }
+      }))
+    };
+
+    scriptElement.text = JSON.stringify(itemListJson);
+    this.document.head.appendChild(scriptElement);
   }
 
   /** Load unique category list from backend product catalog. */
