@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, inject, signal, PLATFORM_ID, HostListener } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -65,6 +65,9 @@ export class CatalogComponent implements OnInit {
   public readonly isUpdatingCart = signal<boolean>(false);
   public readonly isCheckingOut = signal<boolean>(false);
 
+  public currentPage = 0;
+  public hasMoreProducts = true;
+
   public ngOnInit(): void {
     // Only execute search/query operations in browser environment (not SSR)
     if (isPlatformBrowser(this.platformId)) {
@@ -82,11 +85,24 @@ export class CatalogComponent implements OnInit {
   /** Load paginated products from backend query endpoint. */
   public loadProducts(): void {
     if (!isPlatformBrowser(this.platformId)) return;
+    if (this.isLoading()) return;
 
     this.isLoading.set(true);
-    this.productsService.getProducts(this.searchQuery, this.selectedCategory).subscribe({
+    const pageSize = 12;
+
+    this.productsService.getProducts(this.searchQuery, this.selectedCategory, this.currentPage, pageSize).subscribe({
       next: (data) => {
-        this.products.set(data);
+        if (this.currentPage === 0) {
+          this.products.set(data);
+        } else {
+          this.products.update(current => [...current, ...data]);
+        }
+        
+        if (data.length < pageSize) {
+          this.hasMoreProducts = false;
+        } else {
+          this.currentPage++;
+        }
         this.isLoading.set(false);
       },
       error: () => {
@@ -100,7 +116,7 @@ export class CatalogComponent implements OnInit {
   public loadCategories(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    this.productsService.getProducts().subscribe({
+    this.productsService.getProducts(undefined, undefined, 0, 1000).subscribe({
       next: (data) => {
         const uniqueCategories = Array.from(new Set(data.map(p => p.category).filter(Boolean) as string[]));
         this.categories.set(uniqueCategories);
@@ -108,14 +124,34 @@ export class CatalogComponent implements OnInit {
     });
   }
 
+  private resetPaginationAndLoad(): void {
+    this.currentPage = 0;
+    this.hasMoreProducts = true;
+    this.loadProducts();
+  }
+
   public onSearchChange(): void {
     this.telemetryService.logEvent('SEARCH', { query: this.searchQuery });
-    this.loadProducts();
+    this.resetPaginationAndLoad();
   }
 
   public onFilterChange(): void {
     this.telemetryService.logEvent('FILTER_CATEGORY', { category: this.selectedCategory });
-    this.loadProducts();
+    this.resetPaginationAndLoad();
+  }
+
+  @HostListener('window:scroll', [])
+  public onWindowScroll(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (this.isLoading() || !this.hasMoreProducts) return;
+
+    const threshold = 200; // pixels from the bottom
+    const position = window.innerHeight + window.scrollY;
+    const height = document.documentElement.scrollHeight;
+
+    if (position >= height - threshold) {
+      this.loadProducts();
+    }
   }
 
   /** Add item to cart via Redis-backed backend API. */
