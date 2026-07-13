@@ -64,7 +64,7 @@ public class ProductImportServiceImpl implements ProductImportService {
                 Files.createDirectories(tempDir);
             }
             Path filePath = tempDir.resolve(taskId + ".csv").toAbsolutePath();
-            file.transferTo(filePath.toFile());
+            file.transferTo(java.util.Objects.requireNonNull(filePath.toFile()));
 
             ProductImportStatusDto status = new ProductImportStatusDto();
             status.setTaskId(taskId);
@@ -83,7 +83,7 @@ public class ProductImportServiceImpl implements ProductImportService {
                     "username", username
             );
             String payload = objectMapper.writeValueAsString(event);
-            kafkaTemplate.send(importRequestTopic, taskId.toString(), payload);
+            kafkaTemplate.send(java.util.Objects.requireNonNull(importRequestTopic), taskId.toString(), payload);
 
             ImportProducts202Response response = new ImportProducts202Response();
             response.setTaskId(taskId);

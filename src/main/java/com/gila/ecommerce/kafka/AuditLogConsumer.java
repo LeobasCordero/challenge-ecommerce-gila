@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuditLogConsumer {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuditLogConsumer.class);
+
     private final AuditLogRepository auditLogRepository;
     private final ObjectMapper objectMapper;
 
@@ -37,27 +39,26 @@ public class AuditLogConsumer {
      * @param message raw JSON payload from Kafka
      */
     @KafkaListener(topics = "${app.kafka.topics.audit-log}", groupId = "${spring.kafka.consumer.group-id}")
-    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void consumeAuditLog(String message) {
         try {
             Map<String, Object> payload = objectMapper.readValue(
                     message, new TypeReference<Map<String, Object>>() {}
             );
 
-            AuditLog log = new AuditLog();
-            log.setId(UUID.fromString((String) payload.get("id")));
-            log.setUsername((String) payload.get("username"));
-            log.setActionType((String) payload.get("action"));
-            log.setStatus((String) payload.get("status"));
-            log.setTimestamp(OffsetDateTime.parse((String) payload.get("timestamp")));
+            AuditLog logEntity = new AuditLog();
+            logEntity.setId(UUID.fromString((String) payload.get("id")));
+            logEntity.setUsername((String) payload.get("username"));
+            logEntity.setActionType((String) payload.get("action"));
+            logEntity.setStatus((String) payload.get("status"));
+            logEntity.setTimestamp(OffsetDateTime.parse((String) payload.get("timestamp")));
 
             @SuppressWarnings("unchecked")
             Map<String, Object> metadata = (Map<String, Object>) payload.get("metadata");
-            log.setDetails(metadata);
+            logEntity.setDetails(metadata);
 
-            auditLogRepository.save(log);
+            auditLogRepository.save(logEntity);
         } catch (Exception e) {
-            // fall through
+            log.error("Failed to parse or save audit log message: {}", message, e);
         }
     }
 }
