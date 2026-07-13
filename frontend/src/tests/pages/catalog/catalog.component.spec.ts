@@ -10,6 +10,7 @@ import { CartService as CartApiService } from '../../../app/core/api/api/cart.se
 import { OrdersService } from '../../../app/core/api/api/orders.service';
 import { CartStateService } from '../../../app/services/cart-state.service';
 import { AuthStateService } from '../../../app/services/auth-state.service';
+import { TelemetryService } from '../../../app/services/telemetry.service';
 
 describe('CatalogComponent', () => {
   let mockProductsService: jasmine.SpyObj<ProductsService>;
@@ -17,6 +18,7 @@ describe('CatalogComponent', () => {
   let mockOrdersService: jasmine.SpyObj<OrdersService>;
   let mockCartState: jasmine.SpyObj<CartStateService>;
   let mockAuthState: jasmine.SpyObj<AuthStateService>;
+  let mockTelemetryService: jasmine.SpyObj<TelemetryService>;
   let mockRouter: jasmine.SpyObj<Router>;
   let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
   let mockActivatedRoute: any;
@@ -36,6 +38,8 @@ describe('CatalogComponent', () => {
     mockAuthState.isAuthenticated.and.returnValue(false);
     mockAuthState.isAdmin.and.returnValue(false);
 
+    mockTelemetryService = jasmine.createSpyObj('TelemetryService', ['logEvent', 'getLogs', 'clearLogs']);
+
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
 
@@ -54,6 +58,7 @@ describe('CatalogComponent', () => {
         { provide: OrdersService, useValue: mockOrdersService },
         { provide: CartStateService, useValue: mockCartState },
         { provide: AuthStateService, useValue: mockAuthState },
+        { provide: TelemetryService, useValue: mockTelemetryService },
         { provide: Router, useValue: mockRouter },
         { provide: MatSnackBar, useValue: mockSnackBar },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },

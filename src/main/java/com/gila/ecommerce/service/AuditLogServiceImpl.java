@@ -18,21 +18,25 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final com.gila.ecommerce.repository.AuditLogRepository auditLogRepository;
 
     @Value("${app.kafka.topics.audit-log}")
     private String auditLogTopic;
 
     /**
-     * Constructor injecting KafkaTemplate and ObjectMapper.
+     * Constructor injecting KafkaTemplate, ObjectMapper, and AuditLogRepository.
      * @param kafkaTemplate kafka template instance
      * @param objectMapper JSON serialization mapper
+     * @param auditLogRepository database repository for audit logs
      */
     public AuditLogServiceImpl(
             KafkaTemplate<String, String> kafkaTemplate,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            com.gila.ecommerce.repository.AuditLogRepository auditLogRepository
     ) {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
+        this.auditLogRepository = auditLogRepository;
     }
 
     /**
@@ -65,5 +69,26 @@ public class AuditLogServiceImpl implements AuditLogService {
         } catch (JsonProcessingException e) {
             // fall through
         }
+    }
+
+    /**
+     * Retrieve paginated database audit logs.
+     * @param pageable pagination parameters
+     * @return list of audit log DTOs
+     */
+    @Override
+    public java.util.List<com.gila.ecommerce.dto.AuditLogDto> getAuditLogs(org.springframework.data.domain.Pageable pageable) {
+        return auditLogRepository.findAll(pageable).stream()
+                .map(log -> {
+                    com.gila.ecommerce.dto.AuditLogDto dto = new com.gila.ecommerce.dto.AuditLogDto();
+                    dto.setId(log.getId());
+                    dto.setTimestamp(log.getTimestamp());
+                    dto.setUsername(log.getUsername());
+                    dto.setActionType(log.getActionType());
+                    dto.setStatus(log.getStatus());
+                    dto.setDetails(log.getDetails());
+                    return dto;
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 }

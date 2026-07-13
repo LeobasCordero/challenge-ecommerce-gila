@@ -1,4 +1,4 @@
-import { ApplicationConfig, importProvidersFrom } from '@angular/core';
+import { ApplicationConfig, importProvidersFrom, ErrorHandler } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
@@ -7,6 +7,7 @@ import { authInterceptor } from './interceptors/auth.interceptor';
 import { BASE_PATH } from './core/api/variables';
 import { ApiModule } from './core/api/api.module';
 import { Configuration } from './core/api/configuration';
+import { TelemetryErrorHandler } from './core/telemetry-error-handler';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,6 +16,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
+    {
+      provide: ErrorHandler,
+      useClass: TelemetryErrorHandler
+    },
     {
       provide: BASE_PATH,
       useValue: window.location.origin

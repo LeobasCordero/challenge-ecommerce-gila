@@ -11,14 +11,18 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Subscription, interval } from 'rxjs';
 import { switchMap, takeWhile } from 'rxjs/operators';
 
 import { ProductsService } from '../../core/api/api/products.service';
 import { OrdersService } from '../../core/api/api/orders.service';
+import { AuditLogsService } from '../../core/api/api/auditLogs.service';
 import { ProductDto } from '../../core/api/model/productDto';
 import { ProductImportStatusDto } from '../../core/api/model/productImportStatusDto';
+import { AuditLogDto } from '../../core/api/model/auditLogDto';
 import { AuthStateService } from '../../services/auth-state.service';
+import { TelemetryService } from '../../services/telemetry.service';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, MODAL_CONFIRMATIONS, SNACKBAR_ACTIONS } from '../../utils/constants';
 import { ImportStatus } from '../../utils/enums';
 
@@ -38,7 +42,8 @@ import { ImportStatus } from '../../utils/enums';
     MatCardModule,
     MatProgressBarModule,
     MatDividerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './admin.component.html'
 })
@@ -46,6 +51,8 @@ export class AdminComponent implements OnInit, OnDestroy {
   public readonly authState = inject(AuthStateService);
   private readonly productsService = inject(ProductsService);
   private readonly ordersService = inject(OrdersService);
+  private readonly auditLogsService = inject(AuditLogsService);
+  private readonly telemetryService = inject(TelemetryService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -60,6 +67,17 @@ export class AdminComponent implements OnInit, OnDestroy {
   public readonly isUploading = signal<boolean>(false);
   public readonly isResetting = signal<boolean>(false);
   public readonly importStatus = signal<ProductImportStatusDto | null>(null);
+
+  // DB Audit Logs
+  public readonly auditLogs = signal<Array<AuditLogDto>>([]);
+  public readonly auditPage = signal<number>(0);
+  public readonly auditPageSize = signal<number>(20);
+  public readonly isAuditLoading = signal<boolean>(false);
+  public readonly auditColumns: string[] = ['timestamp', 'username', 'actionType', 'status', 'details'];
+
+  // Client Telemetry Logs
+  public readonly telemetryLogs = signal<Array<any>>([]);
+  public readonly telemetryColumns: string[] = ['timestamp', 'username', 'action', 'metadata'];
 
   public productForm: FormGroup = this.fb.group({
     name: ['', [Validators.required]],
@@ -252,5 +270,60 @@ export class AdminComponent implements OnInit, OnDestroy {
         this.snackBar.open(ERROR_MESSAGES.RESET_FAILED, SNACKBAR_ACTIONS.CLOSE, { duration: 4000 });
       }
     });
+  }
+
+  // Audit Logs and Telemetry methods
+  public loadAuditLogs(): void {
+    this.isAuditLoading.set(true);
+    this.auditLogsService.getAuditLogs(this.auditPage(), this.auditPageSize()).subscribe({
+      next: (data) => {
+        this.auditLogs.set(data);
+        this.isAuditLoading.set(false);
+      },
+      error: () => {
+        this.isAuditLoading.set(false);
+        this.snackBar.open('Failed to load database audit logs', SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
+      }
+    });
+  }
+
+  public loadTelemetryLogs(): void {
+    const allLogs = this.telemetryService.getLogs();
+    // Sort descending by timestamp
+    allLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    this.telemetryLogs.set(allLogs);
+  }
+
+  public nextAuditPage(): void {
+    this.auditPage.update(p => p + 1);
+    this.loadAuditLogs();
+  }
+
+  public prevAuditPage(): void {
+    if (this.auditPage() > 0) {
+      this.auditPage.update(p => p - 1);
+      this.loadAuditLogs();
+    }
+  }
+
+  public clearTelemetryLogs(): void {
+    if (confirm('Are you sure you want to clear all telemetry logs from local storage?')) {
+      this.telemetryService.clearLogs();
+      this.loadTelemetryLogs();
+    }
+  }
+
+  public onTabChange(event: any): void {
+    const tabIndex = event.index;
+    if (tabIndex === 3) {
+      this.loadAuditLogs();
+    } else if (tabIndex === 4) {
+      this.loadTelemetryLogs();
+    }
+  }
+
+  public formatJson(obj: any): string {
+    if (!obj) return '';
+    return typeof obj === 'string' ? obj : JSON.stringify(obj);
   }
 }

@@ -15,7 +15,7 @@
   <div *ngIf="authState.isAdmin()">
     <h1 i18n="@@adminDashboardTitle">Admin Dashboard</h1>
 
-    <mat-tab-group class="admin-tabs">
+    <mat-tab-group class="admin-tabs" (selectedTabChange)="onTabChange($event)">
       <!-- Products Catalog CRUD Tab -->
       <mat-tab label="Products CRUD" i18n-label="@@tabCrud">
         <div class="tab-content">
@@ -192,6 +192,112 @@
               </div>
             </mat-card-content>
           </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- System Audit Logs Tab -->
+      <mat-tab label="System Audit Logs" i18n-label="@@tabAuditLogs">
+        <div class="tab-content">
+          <div class="logs-header-actions">
+            <button mat-stroked-button color="primary" (click)="loadAuditLogs()" class="refresh-btn">
+              <mat-icon>refresh</mat-icon>
+              <span>Refresh Logs</span>
+            </button>
+          </div>
+
+          <div *ngIf="isAuditLoading()" class="spinner-container">
+            <mat-spinner diameter="40"></mat-spinner>
+          </div>
+
+          <div class="table-container" *ngIf="!isAuditLoading()">
+            <table mat-table [dataSource]="auditLogs()" class="mat-elevation-z1 logs-table">
+              <ng-container matColumnDef="timestamp">
+                <th mat-header-cell *matHeaderCellDef>Timestamp</th>
+                <td mat-cell *matCellDef="let log">{{ log.timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef>Username</th>
+                <td mat-cell *matCellDef="let log">{{ log.username }}</td>
+              </ng-container>
+              <ng-container matColumnDef="actionType">
+                <th mat-header-cell *matHeaderCellDef>Action</th>
+                <td mat-cell *matCellDef="let log">{{ log.actionType }}</td>
+              </ng-container>
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let log">
+                  <span class="status-badge" [ngClass]="(log.status || '').toLowerCase()">{{ log.status }}</span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="details">
+                <th mat-header-cell *matHeaderCellDef>Details</th>
+                <td mat-cell *matCellDef="let log" class="mono-text">{{ formatJson(log.details) }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="auditColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: auditColumns;"></tr>
+            </table>
+            
+            <div *ngIf="auditLogs().length === 0" class="empty-logs-msg">
+              No audit logs captured in database.
+            </div>
+          </div>
+
+          <div class="pagination-actions" *ngIf="!isAuditLoading() && auditLogs().length > 0">
+            <button mat-button [disabled]="auditPage() === 0" (click)="prevAuditPage()">
+              <mat-icon>chevron_left</mat-icon>
+              <span>Previous</span>
+            </button>
+            <span class="page-indicator">Page {{ auditPage() + 1 }}</span>
+            <button mat-button [disabled]="auditLogs().length < auditPageSize()" (click)="nextAuditPage()">
+              <span>Next</span>
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Telemetry Logs Tab -->
+      <mat-tab label="Telemetry Analytics" i18n-label="@@tabTelemetry">
+        <div class="tab-content">
+          <div class="logs-header-actions">
+            <button mat-stroked-button color="primary" (click)="loadTelemetryLogs()" class="refresh-btn">
+              <mat-icon>refresh</mat-icon>
+              <span>Refresh Analytics</span>
+            </button>
+            <button mat-raised-button color="warn" class="clear-btn" [disabled]="telemetryLogs().length === 0" (click)="clearTelemetryLogs()">
+              <mat-icon>delete_forever</mat-icon>
+              <span>Clear Local Logs</span>
+            </button>
+          </div>
+
+          <div class="table-container">
+            <table mat-table [dataSource]="telemetryLogs()" class="mat-elevation-z1 logs-table">
+              <ng-container matColumnDef="timestamp">
+                <th mat-header-cell *matHeaderCellDef>Timestamp</th>
+                <td mat-cell *matCellDef="let log">{{ log.timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef>Username</th>
+                <td mat-cell *matCellDef="let log">{{ log.username }}</td>
+              </ng-container>
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef>Action</th>
+                <td mat-cell *matCellDef="let log">{{ log.action }}</td>
+              </ng-container>
+              <ng-container matColumnDef="metadata">
+                <th mat-header-cell *matHeaderCellDef>Metadata</th>
+                <td mat-cell *matCellDef="let log" class="mono-text">{{ formatJson(log.metadata) }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="telemetryColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: telemetryColumns;"></tr>
+            </table>
+            
+            <div *ngIf="telemetryLogs().length === 0" class="empty-logs-msg">
+              No user actions recorded in telemetry yet.
+            </div>
+          </div>
         </div>
       </mat-tab>
     </mat-tab-group>

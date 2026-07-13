@@ -19,6 +19,7 @@ import { ProductDto } from '../../core/api/model/productDto';
 import { CartItemDto } from '../../core/api/model/cartItemDto';
 import { CartStateService } from '../../services/cart-state.service';
 import { AuthStateService } from '../../services/auth-state.service';
+import { TelemetryService } from '../../services/telemetry.service';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, SNACKBAR_ACTIONS, APP_ROUTES } from '../../utils/constants';
 
 @Component({
@@ -44,6 +45,7 @@ export class CatalogComponent implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly cartApiService = inject(CartApiService);
   private readonly ordersService = inject(OrdersService);
+  private readonly telemetryService = inject(TelemetryService);
   public readonly cartState = inject(CartStateService);
   public readonly authState = inject(AuthStateService);
   private readonly route = inject(ActivatedRoute);
@@ -107,10 +109,12 @@ export class CatalogComponent implements OnInit {
   }
 
   public onSearchChange(): void {
+    this.telemetryService.logEvent('SEARCH', { query: this.searchQuery });
     this.loadProducts();
   }
 
   public onFilterChange(): void {
+    this.telemetryService.logEvent('FILTER_CATEGORY', { category: this.selectedCategory });
     this.loadProducts();
   }
 
@@ -122,6 +126,7 @@ export class CatalogComponent implements OnInit {
       return;
     }
 
+    this.telemetryService.logEvent('ADD_TO_CART', { productId: product.id, productName: product.name });
     this.isAddingToCart.set(true);
     const existingItem = this.cartState.cart()?.items?.find(i => i.product?.id === product.id);
     const newQty = (existingItem?.quantity ?? 0) + 1;
@@ -188,12 +193,14 @@ export class CatalogComponent implements OnInit {
     this.isCheckingOut.set(true);
     this.ordersService.checkout().subscribe({
       next: (order) => {
+        this.telemetryService.logEvent('CHECKOUT_SUCCESS', { orderId: order.id, totalPrice: order.totalPrice });
         this.cartState.clearCart();
         this.isCheckingOut.set(false);
         this.isCartOpen.set(false);
         this.router.navigate([this.routes.CHECKOUT_SUCCESS], { state: { order } });
       },
       error: (err) => {
+        this.telemetryService.logEvent('CHECKOUT_FAILED', { error: err?.error?.detail || err?.error?.message });
         this.isCheckingOut.set(false);
         const msg = err?.error?.detail ?? err?.error?.message ?? ERROR_MESSAGES.CHECKOUT_FAILED;
         this.snackBar.open(msg, SNACKBAR_ACTIONS.CLOSE, { duration: 5000 });
