@@ -1,0 +1,22 @@
+post:
+  tags:
+    - Chatbot
+  summary: Query the e-commerce conversational chatbot
+  operationId: queryChatbot
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/chatbot.yaml#/ChatbotRequestDto'
+  responses:
+    '200':
+      description: Successful chatbot response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/chatbot.yaml#/ChatbotResponseDto'
+    '400':
+      description: Invalid query or prompt injection attempt
+    '401':
+      description: Unauthorized JWT token

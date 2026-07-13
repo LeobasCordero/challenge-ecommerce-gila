@@ -31,6 +31,8 @@ paths:
     $ref: './paths/order_clear.yaml'
   /api/v1/audit-logs:
     $ref: './paths/audit_logs.yaml'
+  /api/v1/chatbot/query:
+    $ref: './paths/chatbot.yaml'
 
 components:
   securitySchemes:
@@ -57,3 +59,7 @@ components:
       $ref: './components/schemas/orders.yaml#/OrderItemDto'
     AuditLogDto:
       $ref: './components/schemas/audit_logs.yaml#/AuditLogDto'
+    ChatbotRequestDto:
+      $ref: './components/schemas/chatbot.yaml#/ChatbotRequestDto'
+    ChatbotResponseDto:
+      $ref: './components/schemas/chatbot.yaml#/ChatbotResponseDto'

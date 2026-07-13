@@ -1,0 +1,17 @@
+ChatbotRequestDto:
+  type: object
+  required:
+    - message
+  properties:
+    message:
+      type: string
+      description: The query message to the chatbot assistant
+
+ChatbotResponseDto:
+  type: object
+  required:
+    - reply
+  properties:
+    reply:
+      type: string
+      description: The formatted reply from the chatbot assistant
