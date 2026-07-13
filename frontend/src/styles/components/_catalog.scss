@@ -326,3 +326,22 @@
     text-decoration: none;
   }
 }
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: $spacing-xl;
+  padding-bottom: $spacing-lg;
+}
+
+.load-more-btn {
+  padding: 8px 24px !important;
+  font-weight: 600 !important;
+  border-radius: $radius-md !important;
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    background-color: $bg-color !important;
+    transform: translateY(-1px);
+  }
+}

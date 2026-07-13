@@ -74,6 +74,13 @@
         </mat-card-footer>
       </mat-card>
     </div>
+
+    <!-- Load More dynamic panel -->
+    <div class="load-more-container" *ngIf="hasMoreProducts && !isLoading() && products().length > 0">
+      <button mat-stroked-button color="primary" class="load-more-btn" (click)="loadProducts()" id="btn-load-more" i18n="@@loadMoreBtn">
+        <mat-icon>expand_more</mat-icon> Load More Products
+      </button>
+    </div>
   </section>
 
   <!-- Cart Sidebar Drawer -->
