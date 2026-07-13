@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -99,12 +100,26 @@ public class ProductImportConsumer {
             List<String[]> rows = csvParser.parse(filePath);
             status.setTotalRows(rows.size());
 
+            Map<String, Integer> headerMap = new HashMap<>();
+            try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(filePath))) {
+                String headerLine = br.readLine();
+                if (headerLine != null) {
+                    String[] headers = headerLine.split("[\\t,;]");
+                    for (int idx = 0; idx < headers.length; idx++) {
+                        String col = headers[idx].replace("\"", "").replace("'", "").trim().toLowerCase();
+                        headerMap.put(col, idx);
+                    }
+                }
+            } catch (IOException e) {
+                // Fallback to default indexes
+            }
+
             List<ProductDto> validDtos = new ArrayList<>();
             List<String> warnings = new ArrayList<>();
             int errorCount = 0;
 
             for (int i = 0; i < rows.size(); i++) {
-                SanitizedRow sanitized = rowSanitizer.sanitize(rows.get(i), i + 1);
+                SanitizedRow sanitized = rowSanitizer.sanitize(rows.get(i), i + 1, headerMap);
                 warnings.addAll(sanitized.getWarnings());
                 if (sanitized.isValid()) {
                     validDtos.add(sanitized.getProductDto());
