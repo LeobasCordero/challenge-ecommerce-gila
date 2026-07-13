@@ -1,0 +1,33 @@
+get:
+  tags:
+    - AuditLogs
+  summary: Retrieve database audit logs (Admin only)
+  operationId: getAuditLogs
+  parameters:
+    - name: page
+      in: query
+      description: Page number (0-indexed)
+      required: false
+      schema:
+        type: integer
+        default: 0
+    - name: size
+      in: query
+      description: Page size limit
+      required: false
+      schema:
+        type: integer
+        default: 20
+  responses:
+    '200':
+      description: List of audit logs
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../components/schemas/audit_logs.yaml#/AuditLogDto'
+    '401':
+      description: Unauthorized JWT session
+    '403':
+      description: Forbidden (requires admin role)

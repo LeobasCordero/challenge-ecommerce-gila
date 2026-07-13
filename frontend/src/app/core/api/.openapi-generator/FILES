@@ -1,9 +1,9 @@
 .gitignore
-.openapi-generator-ignore
 README.md
 api.base.service.ts
 api.module.ts
 api/api.ts
+api/auditLogs.service.ts
 api/auth.service.ts
 api/cart.service.ts
 api/orders.service.ts
@@ -12,6 +12,7 @@ configuration.ts
 encoder.ts
 git_push.sh
 index.ts
+model/auditLogDto.ts
 model/cartDto.ts
 model/cartItemDto.ts
 model/cartItemRequestDto.ts

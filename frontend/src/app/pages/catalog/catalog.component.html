@@ -27,8 +27,20 @@
     </div>
 
     <div class="empty-state" *ngIf="!isLoading() && products().length === 0">
-      <mat-icon class="empty-icon">search_off</mat-icon>
-      <p i18n="@@noProductsFound">No products found matching your criteria.</p>
+      <ng-container *ngIf="searchQuery === '' && selectedCategory === ''; else searchEmptyState">
+        <mat-icon class="empty-icon">inventory</mat-icon>
+        <p *ngIf="!authState.isAdmin()" i18n="@@catalogEmptyCustomer">Welcome! No products in stock. Please contact an administrator to load products.</p>
+        <div *ngIf="authState.isAdmin()" class="admin-empty-cta">
+          <p i18n="@@catalogEmptyAdmin">No products in stock. Go to Product Manager to load products.</p>
+          <a mat-raised-button color="primary" [routerLink]="['/admin']" id="btn-empty-go-manager" i18n="@@goManagerBtn">
+            <mat-icon>settings</mat-icon> Go to Product Manager
+          </a>
+        </div>
+      </ng-container>
+      <ng-template #searchEmptyState>
+        <mat-icon class="empty-icon">search_off</mat-icon>
+        <p i18n="@@noProductsFound">No products found matching your criteria.</p>
+      </ng-template>
     </div>
 
     <div class="grid grid-cols-1 grid-cols-2 grid-cols-3 grid-cols-4" *ngIf="!isLoading()">

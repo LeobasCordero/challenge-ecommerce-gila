@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/cart/**").hasRole("CUSTOMER")
                 .requestMatchers(HttpMethod.POST, "/api/v1/orders/checkout").hasAnyRole("CUSTOMER", "ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/clear").hasRole("ADMIN")
+                .requestMatchers("/api/v1/audit-logs").hasRole("ADMIN")
                 .anyRequest().authenticated()
             );
 

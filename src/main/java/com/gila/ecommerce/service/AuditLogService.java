@@ -15,4 +15,11 @@ public interface AuditLogService {
      * @param details structured map containing metadata details
      */
     void log(String username, String actionType, String status, Map<String, Object> details);
+
+    /**
+     * Retrieve paginated database audit logs.
+     * @param pageable pagination parameters
+     * @return list of audit log DTOs
+     */
+    java.util.List<com.gila.ecommerce.dto.AuditLogDto> getAuditLogs(org.springframework.data.domain.Pageable pageable);
 }

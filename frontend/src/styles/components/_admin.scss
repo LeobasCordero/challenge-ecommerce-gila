@@ -238,3 +238,96 @@
     color: white !important;
   }
 }
+
+// Logs and Telemetry Styles
+.logs-header-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.logs-table {
+  width: 100%;
+  margin-top: $spacing-xs;
+  
+  .mat-column-timestamp {
+    width: 160px;
+  }
+  
+  .mat-column-username {
+    width: 120px;
+  }
+  
+  .mat-column-actionType, .mat-column-action {
+    width: 150px;
+  }
+
+  .mat-column-status {
+    width: 100px;
+  }
+}
+
+.mono-text {
+  font-family: monospace;
+  font-size: 11px;
+  word-break: break-all;
+  max-width: 450px;
+  white-space: pre-wrap;
+  color: $text-muted;
+}
+
+.empty-logs-msg {
+  padding: $spacing-xl 0;
+  text-align: center;
+  color: $text-muted;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-xl 0;
+}
+
+.pagination-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-md;
+  margin-top: $spacing-md;
+}
+
+.page-indicator {
+  font-weight: 500;
+  color: $text-main;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  
+  &.success {
+    background-color: #e6fffa;
+    color: #008080;
+    border: 1px solid #b2f5ea;
+  }
+
+  &.failure {
+    background-color: #fff5f5;
+    color: #c53030;
+    border: 1px solid #fed7d7;
+  }
+  
+  &.error {
+    background-color: #fff5f5;
+    color: #c53030;
+    border: 1px solid #fed7d7;
+  }
+}

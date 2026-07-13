@@ -1,3 +1,4 @@
+export * from './auditLogDto';
 export * from './cartDto';
 export * from './cartItemDto';
 export * from './cartItemRequestDto';

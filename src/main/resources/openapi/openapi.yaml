@@ -29,6 +29,8 @@ paths:
     $ref: './paths/order_checkout.yaml'
   /api/v1/orders/clear:
     $ref: './paths/order_clear.yaml'
+  /api/v1/audit-logs:
+    $ref: './paths/audit_logs.yaml'
 
 components:
   securitySchemes:
@@ -53,3 +55,5 @@ components:
       $ref: './components/schemas/orders.yaml#/OrderDto'
     OrderItemDto:
       $ref: './components/schemas/orders.yaml#/OrderItemDto'
+    AuditLogDto:
+      $ref: './components/schemas/audit_logs.yaml#/AuditLogDto'

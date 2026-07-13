@@ -1,3 +1,5 @@
+export * from './auditLogs.service';
+import { AuditLogsService } from './auditLogs.service';
 export * from './auth.service';
 import { AuthService } from './auth.service';
 export * from './cart.service';
@@ -6,4 +8,4 @@ export * from './orders.service';
 import { OrdersService } from './orders.service';
 export * from './products.service';
 import { ProductsService } from './products.service';
-export const APIS = [AuthService, CartService, OrdersService, ProductsService];
+export const APIS = [AuditLogsService, AuthService, CartService, OrdersService, ProductsService];

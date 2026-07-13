@@ -1,0 +1,24 @@
+AuditLogDto:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: Unique identifier of the audit log record
+    timestamp:
+      type: string
+      format: date-time
+      description: Log event occurrence timestamp
+    username:
+      type: string
+      description: Username who performed the action
+    actionType:
+      type: string
+      description: Action description category
+    status:
+      type: string
+      description: Action status (e.g. SUCCESS, FAILURE)
+    details:
+      type: object
+      additionalProperties: true
+      description: Additional transaction metadata details
