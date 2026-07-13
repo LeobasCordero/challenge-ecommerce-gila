@@ -4,6 +4,7 @@ import com.gila.ecommerce.dto.ProductDto;
 import com.gila.ecommerce.exception.ErrorMessages;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
@@ -21,17 +22,36 @@ public class ProductRowSanitizer {
      * @return SanitizedRow containing product DTO and warnings
      */
     public SanitizedRow sanitize(String[] row, int rowIndex) {
+        return sanitize(row, rowIndex, Map.of());
+    }
+
+    /**
+     * Parse and sanitize raw CSV string array fields into a structured SanitizedRow using dynamic headers.
+     * @param row raw CSV fields array
+     * @param rowIndex index of the current row (for log reporting)
+     * @param headerMap map of header names to CSV column indexes
+     * @return SanitizedRow containing product DTO and warnings
+     */
+    public SanitizedRow sanitize(String[] row, int rowIndex, Map<String, Integer> headerMap) {
         List<String> warnings = new ArrayList<>();
-        if (row == null || row.length < 5) {
+        
+        int nameIdx = headerMap.getOrDefault("name", 0);
+        int descIdx = headerMap.getOrDefault("description", 1);
+        int priceIdx = headerMap.getOrDefault("price", 2);
+        int stockIdx = headerMap.getOrDefault("stock", 3);
+        int catIdx = headerMap.getOrDefault("category", 4);
+
+        int maxIdx = Math.max(Math.max(nameIdx, descIdx), Math.max(priceIdx, Math.max(stockIdx, catIdx)));
+        if (row == null || row.length <= maxIdx) {
             warnings.add(ErrorMessages.ROW_PREFIX + rowIndex + ErrorMessages.INSUFFICIENT_COLUMNS);
             return new SanitizedRow(null, warnings, false);
         }
 
-        String name = row[0];
-        String description = row[1];
-        String priceStr = row[2];
-        String stockStr = row[3];
-        String category = row[4];
+        String name = row[nameIdx];
+        String description = row[descIdx];
+        String priceStr = row[priceIdx];
+        String stockStr = row[stockIdx];
+        String category = row[catIdx];
 
         if (!StringUtils.hasText(name)
                 || !StringUtils.hasText(priceStr)

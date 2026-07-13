@@ -30,7 +30,7 @@ public class ProductImportServiceImpl implements ProductImportService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final Map<UUID, ProductImportStatusDto> statuses = new ConcurrentHashMap<>();
-    private final Path tempDir = Paths.get("temp-imports");
+    private final Path tempDir = Paths.get(System.getProperty("java.io.tmpdir")).resolve("temp-imports");
 
     @Value("${app.kafka.topics.import-request}")
     private String importRequestTopic;
@@ -63,7 +63,7 @@ public class ProductImportServiceImpl implements ProductImportService {
             if (!Files.exists(tempDir)) {
                 Files.createDirectories(tempDir);
             }
-            Path filePath = tempDir.resolve(taskId + ".csv");
+            Path filePath = tempDir.resolve(taskId + ".csv").toAbsolutePath();
             file.transferTo(filePath.toFile());
 
             ProductImportStatusDto status = new ProductImportStatusDto();
