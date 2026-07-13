@@ -82,7 +82,11 @@ public class ProductServiceImpl implements ProductService {
         int pageNum = (page != null) ? page : 0;
         int pageSize = (size != null) ? size : 20;
         Pageable pageable = PageRequest.of(pageNum, pageSize);
-        return productRepository.findProductsByFilter(query, category, pageable)
+        
+        String cleanQuery = query != null && !query.trim().isEmpty() ? query.trim() : null;
+        String cleanCategory = category != null && !category.trim().isEmpty() ? category.trim() : null;
+
+        return productRepository.findProductsByFilter(cleanQuery, cleanCategory, pageable)
                 .getContent().stream()
                 .map(ProductMapper::toDto)
                 .collect(Collectors.toList());
