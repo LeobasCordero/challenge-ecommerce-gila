@@ -21,7 +21,9 @@ import { CartItemDto } from '../../core/api/model/cartItemDto';
 import { CartStateService } from '../../services/cart-state.service';
 import { AuthStateService } from '../../services/auth-state.service';
 import { TelemetryService } from '../../services/telemetry.service';
+import { TranslationService } from '../../services/translation.service';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, SNACKBAR_ACTIONS, APP_ROUTES } from '../../utils/constants';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-catalog',
@@ -38,11 +40,13 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES, SNACKBAR_ACTIONS, APP_ROUTES } from '
     MatIconModule,
     MatProgressSpinnerModule,
     MatDividerModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    TranslatePipe
   ],
   templateUrl: './catalog.component.html'
 })
 export class CatalogComponent implements OnInit {
+  public readonly ts = inject(TranslationService);
   private readonly productsService = inject(ProductsService);
   private readonly cartApiService = inject(CartApiService);
   private readonly ordersService = inject(OrdersService);

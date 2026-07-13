@@ -5,6 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { OrderDto } from '../../core/api/model/orderDto';
+import { TranslationService } from '../../services/translation.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-checkout-success',
@@ -14,12 +16,14 @@ import { OrderDto } from '../../core/api/model/orderDto';
     RouterModule,
     MatButtonModule,
     MatIconModule,
-    MatDividerModule
+    MatDividerModule,
+    TranslatePipe
   ],
   templateUrl: './checkout-success.component.html'
 })
 export class CheckoutSuccessComponent implements OnInit {
   private readonly router = inject(Router);
+  public readonly ts = inject(TranslationService);
 
   public order: OrderDto | null = null;
 

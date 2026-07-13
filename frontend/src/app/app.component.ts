@@ -8,8 +8,10 @@ import { MatMenuModule } from '@angular/material/menu';
 
 import { AuthStateService } from './services/auth-state.service';
 import { CartStateService } from './services/cart-state.service';
+import { TranslationService } from './services/translation.service';
 import { APP_ROUTES } from './utils/constants';
 import { ChatbotComponent } from './components/chatbot/chatbot.component';
+import { TranslatePipe } from './pipes/translate.pipe';
 
 @Component({
   selector: 'app-root',
@@ -22,39 +24,23 @@ import { ChatbotComponent } from './components/chatbot/chatbot.component';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    ChatbotComponent
+    ChatbotComponent,
+    TranslatePipe
   ],
   templateUrl: './app.component.html'
 })
 export class AppComponent {
   public readonly authState = inject(AuthStateService);
   public readonly cartState = inject(CartStateService);
+  public readonly ts = inject(TranslationService);
   private readonly router = inject(Router);
 
   public currentLang(): string {
-    if (typeof window !== 'undefined') {
-      const path = window.location.pathname;
-      if (path.startsWith('/es/')) return 'es';
-    }
-    return 'en';
+    return this.ts.currentLang();
   }
 
   public switchLanguage(lang: string): void {
-    if (typeof window !== 'undefined') {
-      const currentLoc = this.currentLang();
-      if (currentLoc === lang) return;
-
-      // Redirect browser to localized path configurations (e.g. /es/ or /en/)
-      const path = window.location.pathname;
-      let newPath = '';
-      if (lang === 'es') {
-        newPath = '/es' + path;
-      } else {
-        newPath = path.replace(/^\/es/, '');
-      }
-      
-      window.location.href = window.location.origin + newPath;
-    }
+    this.ts.setLanguage(lang as 'en' | 'es');
   }
 
   public logout(): void {
