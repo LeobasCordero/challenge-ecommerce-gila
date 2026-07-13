@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy dependency configs
 COPY package*.json ./
 
-# Use BuildKit cache mount for npm to speed up package installation and avoid downloading packages from scratch
-RUN --mount=type=cache,target=/root/.npm npm ci
+# Install Dependencies
+RUN npm ci --no-audit --no-fund
 
 # Copy sources and build the Angular application
 COPY . .
