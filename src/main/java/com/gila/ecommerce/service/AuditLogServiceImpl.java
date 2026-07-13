@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuditLogServiceImpl implements AuditLogService {
 
+    private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AuditLogServiceImpl.class);
+
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final com.gila.ecommerce.repository.AuditLogRepository auditLogRepository;
@@ -47,7 +49,6 @@ public class AuditLogServiceImpl implements AuditLogService {
      * @param metadata map of arbitrary key-value details relating to operation context
      */
     @Override
-    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void log(
             String username,
             String action,
@@ -65,9 +66,9 @@ public class AuditLogServiceImpl implements AuditLogService {
 
         try {
             String jsonPayload = objectMapper.writeValueAsString(payload);
-            kafkaTemplate.send(auditLogTopic, messageId, jsonPayload);
+            kafkaTemplate.send(java.util.Objects.requireNonNull(auditLogTopic), messageId, jsonPayload);
         } catch (JsonProcessingException e) {
-            // fall through
+            logger.error("Failed to serialize audit log payload to JSON", e);
         }
     }
 

@@ -29,6 +29,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductImportConsumer {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProductImportConsumer.class);
+
     private final ProductImportService importService;
     private final ProductCsvParser csvParser;
     private final ProductRowSanitizer rowSanitizer;
@@ -73,7 +75,6 @@ public class ProductImportConsumer {
      * @param message JSON payload containing taskId and filePath
      */
     @KafkaListener(topics = "${app.kafka.topics.import-request}", groupId = "${spring.kafka.consumer.group-id}")
-    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void consumeImportRequest(String message) {
         UUID taskId = null;
         String filePath = null;
@@ -111,7 +112,7 @@ public class ProductImportConsumer {
                     }
                 }
             } catch (IOException e) {
-                // Fallback to default indexes
+                log.warn("Failed to read CSV header for dynamic mapping, falling back to default column order", e);
             }
 
             List<ProductDto> validDtos = new ArrayList<>();
@@ -138,7 +139,7 @@ public class ProductImportConsumer {
 
             importService.updateStatus(taskId, status);
             kafkaTemplate.send(
-                    importStatusTopic, taskId.toString(),
+                    java.util.Objects.requireNonNull(importStatusTopic), taskId.toString(),
                     objectMapper.writeValueAsString(status)
             );
 
@@ -157,11 +158,11 @@ public class ProductImportConsumer {
                     status.getWarnings().add(ErrorMessages.CRITICAL_SYSTEM_ERROR_PREFIX + e.getMessage());
                     importService.updateStatus(taskId, status);
                     kafkaTemplate.send(
-                            importStatusTopic, taskId.toString(),
+                            java.util.Objects.requireNonNull(importStatusTopic), taskId.toString(),
                             objectMapper.writeValueAsString(status)
                     );
                 } catch (Exception ex) {
-                    // fall through
+                    log.error("Failed to update status to FAILED in secondary catch block", ex);
                 }
             }
             auditLogService.log(
@@ -175,7 +176,7 @@ public class ProductImportConsumer {
                 try {
                     Files.deleteIfExists(Paths.get(filePath));
                 } catch (IOException e) {
-                    // fall through
+                    log.warn("Failed to delete CSV file: {}", filePath, e);
                 }
             }
         }
