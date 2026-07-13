@@ -58,8 +58,8 @@ INSERT INTO roles (id, name) VALUES
 
 -- Seed Users (password is "password")
 INSERT INTO users (id, username, password, enabled) VALUES 
-('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d', 'admin', '$2a$10$8.UnVuG9HHgffUDAlk8GP.3q3gOP3h0zUYtCqy.Z2yK652sUYKzC.', true),
-('8a7b6c5d-4e3f-2a1b-0c9d-8e7f6a5b4c3d', 'customer', '$2a$10$8.UnVuG9HHgffUDAlk8GP.3q3gOP3h0zUYtCqy.Z2yK652sUYKzC.', true);
+('9a8b7c6d-5e4f-3a2b-1c0d-9e8f7a6b5c4d', 'admin', '$2a$10$Dpwk8.EOvDvWnLEdOYEn8eXCacNMj3TZ6A2LkNFGSC9fmCTCxi7dG', true),
+('8a7b6c5d-4e3f-2a1b-0c9d-8e7f6a5b4c3d', 'customer', '$2a$10$Dpwk8.EOvDvWnLEdOYEn8eXCacNMj3TZ6A2LkNFGSC9fmCTCxi7dG', true);
 
 -- Assign Roles
 INSERT INTO user_roles (user_id, role_id) VALUES 
