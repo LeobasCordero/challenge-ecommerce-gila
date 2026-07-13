@@ -1,31 +1,33 @@
 package app.authz
 
+import future.keywords.if
+
 default allow = false
 
 # Helper to check if a user is an admin
-is_admin {
+is_admin if {
     input.roles[_] == "ROLE_ADMIN"
 }
 
 # Helper to check if a user is a customer
-is_customer {
+is_customer if {
     input.roles[_] == "ROLE_CUSTOMER"
 }
 
 # Admin gets access to all endpoints and methods
-allow {
+allow if {
     is_admin
 }
 
 # Public endpoints (can be accessed by anyone, including guests)
 # POST /api/v1/auth/login
-allow {
+allow if {
     input.method == "POST"
     input.path == ["api", "v1", "auth", "login"]
 }
 
 # GET /api/v1/products and GET /api/v1/products/{id} (public)
-allow {
+allow if {
     input.method == "GET"
     input.path[0] == "api"
     input.path[1] == "v1"
@@ -34,14 +36,14 @@ allow {
 
 # Customer specific endpoints:
 # POST /api/v1/orders/checkout
-allow {
+allow if {
     is_customer
     input.method == "POST"
     input.path == ["api", "v1", "orders", "checkout"]
 }
 
 # CRUD on /api/v1/cart and /api/v1/cart/items/**
-allow {
+allow if {
     is_customer
     input.path[0] == "api"
     input.path[1] == "v1"
@@ -49,7 +51,7 @@ allow {
 }
 
 # POST /api/v1/chatbot/query
-allow {
+allow if {
     is_customer
     input.method == "POST"
     input.path == ["api", "v1", "chatbot", "query"]
