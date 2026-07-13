@@ -1,0 +1,11 @@
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+
+# Copy the pre-built jar file compiled on the host
+COPY target/*.jar app.jar
+
+# Expose port
+EXPOSE 8080
+
+# Run the jar file with JVM optimizations
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

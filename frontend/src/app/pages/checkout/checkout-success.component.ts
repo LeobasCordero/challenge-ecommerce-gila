@@ -23,10 +23,12 @@ export class CheckoutSuccessComponent implements OnInit {
 
   public order: OrderDto | null = null;
 
-  public ngOnInit(): void {
+  constructor() {
     const nav = this.router.getCurrentNavigation();
     this.order = nav?.extras?.state?.['order'] ?? null;
+  }
 
+  public ngOnInit(): void {
     // If navigated directly without state, attempt to read from current history state
     if (!this.order && typeof window !== 'undefined') {
       this.order = window.history.state?.order ?? null;
