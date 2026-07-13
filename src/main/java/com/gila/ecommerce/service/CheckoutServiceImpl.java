@@ -99,6 +99,7 @@ public class CheckoutServiceImpl implements CheckoutService {
             productRepository.save(product);
 
             OrderItem orderItem = new OrderItem();
+            orderItem.setId(UUID.randomUUID());
             orderItem.setOrder(order);
             orderItem.setProduct(product);
             orderItem.setQuantity(cartItem.getQuantity());
