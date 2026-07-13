@@ -28,7 +28,7 @@
               </mat-card-title>
             </mat-card-header>
             <mat-card-content>
-              <form [formGroup]="productForm" (ngSubmit)="saveProduct()" class="product-form">
+              <form [formGroup]="productForm" #formDir="ngForm" (ngSubmit)="saveProduct(formDir)" class="product-form">
                 <div class="form-row">
                   <mat-form-field appearance="outline">
                     <mat-label i18n="@@prodName">Name</mat-label>

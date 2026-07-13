@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormGroupDirective } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -105,7 +105,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     });
   }
 
-  public saveProduct(): void {
+  public saveProduct(formDir?: FormGroupDirective): void {
     if (this.productForm.invalid) {
       return;
     }
@@ -124,6 +124,11 @@ export class AdminComponent implements OnInit, OnDestroy {
         next: () => {
           this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_UPDATED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
           this.cancelEdit();
+          if (formDir) {
+            formDir.resetForm({ price: 0, stock: 0 });
+          } else {
+            this.productForm.reset({ price: 0, stock: 0 });
+          }
           this.loadProducts();
         },
         error: () => {
@@ -134,7 +139,11 @@ export class AdminComponent implements OnInit, OnDestroy {
       this.productsService.createProduct(productDto).subscribe({
         next: () => {
           this.snackBar.open(SUCCESS_MESSAGES.PRODUCT_CREATED, SNACKBAR_ACTIONS.CLOSE, { duration: 3000 });
-          this.productForm.reset({ price: 0, stock: 0 });
+          if (formDir) {
+            formDir.resetForm({ price: 0, stock: 0 });
+          } else {
+            this.productForm.reset({ price: 0, stock: 0 });
+          }
           this.loadProducts();
         },
         error: () => {
