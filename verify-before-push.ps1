@@ -1,32 +1,46 @@
 $ErrorActionPreference = "Stop"
 
-Write-Host "Starting local validation pipeline..."
+$ScriptDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
+if ($ScriptDir) {
+    Set-Location -Path $ScriptDir
+}
 
-# 1. Frontend Checks
-Write-Host "Running frontend validation..."
-Set-Location -Path "frontend"
+Write-Host "Starting parallel validation checks..."
 
-Write-Host "Installing frontend dependencies..."
-npm ci
+$FrontendJob = Start-Job -Name "FrontendValidation" -ScriptBlock {
+    Set-Location -Path "$using:ScriptDir/frontend"
+    npm ci --prefer-offline
+    npm run lint
+    npm run stylelint
+    npm run test -- --watch=false --browsers=ChromeHeadless --no-progress
+    npm run test:pact
+}
 
-Write-Host "Running ESLint..."
-npm run lint
+$BackendJob = Start-Job -Name "BackendValidation" -ScriptBlock {
+    Set-Location -Path $using:ScriptDir
+    mvn clean verify
+}
 
-Write-Host "Running Stylelint..."
-npm run stylelint
+$Jobs = @($FrontendJob, $BackendJob)
+while ($true) {
+    $Running = $false
+    foreach ($Job in $Jobs) {
+        $State = $Job.State
+        if ($State -eq "Failed" -or ($State -eq "Completed" -and $Job.ChildJobs[0].Error.Count -gt 0)) {
+            Write-Error "Validation task $($Job.Name) failed! Terminating remaining processes..."
+            $Jobs | Stop-Job
+            $Jobs | Receive-Job
+            throw "Validation failed."
+        }
+        if ($State -eq "Running" -or $State -eq "NotStarted") {
+            $Running = $true
+        }
+    }
+    if (-not $Running) { break }
+    Start-Sleep -Milliseconds 250
+}
 
-Write-Host "Running Karma unit tests in headless mode..."
-npm run test -- --watch=false --browsers=ChromeHeadless
-
-Write-Host "Running Pact consumer contract tests..."
-npm run test:pact
-
-Set-Location -Path ".."
-
-# 2. Backend Checks
-Write-Host "Running backend validation..."
-Write-Host "Compiling and running Checkstyle, PMD, and tests..."
-mvn clean verify
+$Jobs | Receive-Job -Wait | Out-Null
 
 # 3. SonarQube Scanner
 Write-Host "Checking if SonarQube server is reachable on http://localhost:9000..."

@@ -45,10 +45,11 @@ npm start
 ```
 
 ### Production Build
-Builds the client with optimization budgets to `/dist/frontend/`:
+Builds the client with optimization budgets to `/dist/frontend/browser/`:
 ```bash
 npm run build
 ```
+*Note: In the containerized environment, the compiled static assets are served through an Alpine Nginx reverse-proxy on port 80, which is preconfigured to handle Angular client-side routing.*
 
 ### Unit Tests (Karma / Jasmine)
 Executes all local unit spec files inside the centralized `src/tests/` folder:

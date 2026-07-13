@@ -3,6 +3,9 @@ name: Frontend CI
 on:
   workflow_call:
 
+env:
+  DOCKER_BUILDKIT: 1
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -19,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: frontend
-        run: npm ci
+        run: npm ci --prefer-offline
 
       - name: Run ESLint
         working-directory: frontend
@@ -31,7 +34,7 @@ jobs:
 
       - name: Run Karma unit tests
         working-directory: frontend
-        run: npm run test -- --watch=false --browsers=ChromeHeadless
+        run: npm run test -- --watch=false --browsers=ChromeHeadless --no-progress
 
       - name: Create pacts directory
         working-directory: frontend
@@ -51,14 +54,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-frontend-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-frontend-buildx-
-
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
@@ -66,10 +61,5 @@ jobs:
           file: ./frontend/Dockerfile
           push: false
           tags: ecommerce-frontend:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-
-      - name: Move cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

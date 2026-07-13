@@ -35,3 +35,6 @@ temp-imports/
 # Prevent shell scripts from being tracked
 *.sh
 
+# Demo Guide
+demo-guide.md
+

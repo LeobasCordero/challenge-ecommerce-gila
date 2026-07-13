@@ -70,4 +70,9 @@ export class LoginComponent {
       }
     });
   }
+
+  /** Auto-fill the credentials form with test/demo users */
+  public fillCredentials(username: string, password: string): void {
+    this.loginForm.setValue({ username, password });
+  }
 }

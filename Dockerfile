@@ -2,16 +2,18 @@
 FROM maven:3.8.8-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy pom.xml, config rulesets, and source code
+# 1. Copy pom.xml first
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
 
-# Copy source code
-COPY src ./src
+# 2. Pre-fetch dependencies using cache mount
+RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline -B
+
+# 3. Copy config and source code afterwards
 COPY config ./config
+COPY src ./src
 
-# Compile and package
-RUN mvn package -DskipTests -B
+# 4. Compile and package with cache mount
+RUN --mount=type=cache,target=/root/.m2 mvn package -DskipTests -B
 
 # Stage 2: Runtime stage
 FROM eclipse-temurin:17-jre-alpine
