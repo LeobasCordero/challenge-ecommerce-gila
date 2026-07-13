@@ -131,3 +131,21 @@ We utilize the **Pact contract testing framework** to ensure seamless Integratio
     mvn test -Dtest=PactProviderVerificationTest
     ```
 
+---
+
+## Decisiones de Diseño y Alcance del Proyecto / Project Design Decisions & Scope
+
+### Español
+Intente utilizar todas las tecnologias que podrian ayudar a un e-commerce, ademas de aprovechar para agregar analiticas que se utilizan en este tipo de aplicaciones, asimismo aplicar reglas basicas de seguridad tanto en los endpoints como en el flujo de la aplicacion, tambien intente agregar tecnologias que ayuden a la calidad del codigo pero aumentaban mucho el tiempo de dockerizacion. Agregue un posible pipeline para el deploye en produccion, por ahora no funciona, pero se dejan las instrucciones en caso de que se tengan las credenciales necesarias. Decidi agregar tambien un bot que solo conteste preguntas sobre los productos, esto para incluir el uso de IA en la aplicacion, tmb inclui multilenguaje (ingles y español por ahora), el diseño que le di al front fue generico y deje que la IA lo decidiera al no verlo prioritario en esta entrega.
+Tambien se incluye el uso de redis para la mejora de la velocidad utilizandolo como cache, y un brocker de apache kafka para que nos ayude con el performance cuando existan muchos productos por procesar.
+En el front utilice sass para los estilos y le di estructura de patron 7-1, ademas tanto en front como en back estan utilizando Spec Driven Development y por lo tanto tengo una especificacion de contrato que ayuda a la IA a que su desarrollo tenga fronteras visibles y no vaya a alucinar.
+En los pipelines de continuos integration trate de que fueran lo mas optimizados para que fueran lo mas rapido posible, ahorita en local los tiempos tienden a ser entre 90 y 150 segundos.
+Una ultima cosa, por ahora solo hay dos usuarios que son de prueba y se agregaron en el login, el customer y el admin, ambos funcionan diferente de tal manera que se note la distincion, un ejemplo es que el admin no puede hacer compras, y el customer no puede agregar productos.
+
+### English
+I tried to use all the technologies that could help an e-commerce, in addition to taking the opportunity to add analytics that are typically used in these kinds of applications. Furthermore, I applied basic security rules both on the endpoints and in the application flow. I also tried to add technologies that assist with code quality, but they significantly increased the dockerization time. I added a potential pipeline for production deployment; it doesn't work for now, but instructions are provided in case the necessary credentials are available. I decided to also include a chatbot that only answers product-related questions to incorporate AI usage in the application. Additionally, I included multi-language support (English and Spanish for now). The design given to the frontend was generic, letting the AI decide it, as it was not considered a priority for this delivery.
+The project also includes the use of Redis for speed improvement by using it as a cache, and an Apache Kafka broker to assist with performance when there are many products to process.
+On the frontend, I used Sass for styling with a 7-1 pattern structure. Additionally, both the frontend and backend utilize Spec-Driven Development; hence, I have a contract specification that helps the AI keep its development within visible boundaries and avoid hallucinations.
+I tried to keep the Continuous Integration pipelines as optimized as possible to make them run as fast as possible; currently, local build times tend to range between 90 and 150 seconds.
+One last thing: for now, there are only two test users added at login, the customer and the admin. Both function differently to make their distinction clear. For example, the admin cannot make purchases, and the customer cannot add new products.
+
