@@ -28,9 +28,9 @@ export class CartStateService {
   });
 
   constructor() {
-    // Automatically fetch cart from Redis whenever the user authenticates.
+    // Automatically fetch cart from Redis whenever the user authenticates as a customer.
     effect(() => {
-      if (this.authState.isAuthenticated()) {
+      if (this.authState.isAuthenticated() && this.authState.isCustomer()) {
         this.loadCartFromBackend();
       } else {
         this._cart.set(null);

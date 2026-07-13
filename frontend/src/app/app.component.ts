@@ -60,4 +60,12 @@ export class AppComponent {
     this.cartState.clearCart();
     this.router.navigate([APP_ROUTES.LOGIN]);
   }
+
+  public isOnLoginPage(): boolean {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      return path.endsWith('/login') || path.endsWith('/login/');
+    }
+    return false;
+  }
 }

@@ -6,10 +6,10 @@
     </div>
     
     <nav class="header-nav">
-      <a class="header-link" routerLink="/catalog" routerLinkActive="active" i18n="@@navCatalog">Catalog</a>
-      <a class="header-link" *ngIf="authState.isAdmin()" routerLink="/admin" routerLinkActive="active" i18n="@@navAdmin">Admin</a>
+      <a class="header-link" *ngIf="authState.isAuthenticated() && !isOnLoginPage()" routerLink="/catalog" routerLinkActive="active" i18n="@@navCatalog">Catalog</a>
+      <a class="header-link" *ngIf="authState.isAdmin() && !isOnLoginPage()" routerLink="/admin" routerLinkActive="active" i18n="@@navAdmin">Admin</a>
       
-      <div class="nav-divider"></div>
+      <div class="nav-divider" *ngIf="authState.isAuthenticated() && !isOnLoginPage()"></div>
       
       <!-- i18n Language Selector -->
       <button mat-button [matMenuTriggerFor]="langMenu" class="lang-selector-btn">
@@ -21,20 +21,20 @@
         <button mat-menu-item (click)="switchLanguage('es')">Español</button>
       </mat-menu>
 
-      <a class="header-link cart-btn" routerLink="/catalog" [queryParams]="{ cartOpen: true }">
+      <a class="header-link cart-btn" *ngIf="authState.isAuthenticated() && authState.isCustomer() && !isOnLoginPage()" routerLink="/catalog" [queryParams]="{ cartOpen: true }">
         <mat-icon>shopping_cart</mat-icon>
         <span class="cart-badge" *ngIf="cartState.itemCount() > 0">{{ cartState.itemCount() }}</span>
       </a>
 
       <!-- User Session Management -->
-      <ng-container *ngIf="authState.isAuthenticated(); else guestView">
+      <ng-container *ngIf="authState.isAuthenticated() && !isOnLoginPage(); else guestView">
         <span class="user-greeting">Hi, {{ authState.username() }}</span>
         <button mat-icon-button color="warn" (click)="logout()" [attr.aria-label]="'Logout'">
           <mat-icon>logout</mat-icon>
         </button>
       </ng-container>
       <ng-template #guestView>
-        <button mat-stroked-button color="primary" class="login-btn-header" routerLink="/login" i18n="@@navLogin">Login</button>
+        <button *ngIf="!isOnLoginPage()" mat-stroked-button color="primary" class="login-btn-header" routerLink="/login" i18n="@@navLogin">Login</button>
       </ng-template>
     </nav>
   </div>

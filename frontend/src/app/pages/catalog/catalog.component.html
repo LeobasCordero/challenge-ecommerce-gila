@@ -65,7 +65,7 @@
 
         <mat-card-footer class="product-card-footer">
           <span class="product-price">${{ product.price.toFixed(2) }}</span>
-          <button mat-raised-button color="primary" id="add-to-cart-{{ product.id }}"
+          <button *ngIf="!authState.isAdmin()" mat-raised-button color="primary" id="add-to-cart-{{ product.id }}"
             class="add-to-cart-btn" (click)="addToCart(product)"
             [disabled]="product.stock === 0 || isAddingToCart()">
             <mat-icon>add_shopping_cart</mat-icon>
