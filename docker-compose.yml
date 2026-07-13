@@ -101,6 +101,20 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  opa:
+    image: openpolicyagent/opa:latest
+    container_name: ecommerce-opa
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./src/main/resources/policies:/policies
+    command:
+      - "run"
+      - "--server"
+      - "--log-level=debug"
+      - "/policies"
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   redis_data:
